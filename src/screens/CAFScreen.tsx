@@ -11,33 +11,32 @@ import {
     ScrollView,
 } from 'react-native';
 
-export function CAFSampleScreen()
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer, StackActions } from '@react-navigation/native';
+const Stack = createNativeStackNavigator();
+
+export default function CAFStackNavigation()
 {
     return (
-        <View>
-            <Text> Test </Text>
+        <Stack.Navigator>
+            <Stack.Screen name="Continuous AF Detection" component={CAFScreen} />
+            <Stack.Screen name="Continuous AF ECG Sample List" component={CAFSampleScreen} />
+        </Stack.Navigator>
+    )
+}
+
+export function CAFSampleScreen({ navigation } : {navigation:any})
+{
+    return (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <Text>AF Screen</Text>
         </View>
     )
 }
 
-export default function CAFScreen({ navigation } : {navigation:any})
+export function CAFScreen({ navigation } : {navigation:any})
 {
-    const [open, setOpen] = React.useState(false);
-    const [value, setValue] = React.useState(null);
-    const [items, setItems] = React.useState([
-        {label: 'ecg.json', value: 'ecg.json'},
-        {label: '0006-6.txt', value: '0006-6.txt'},
-        {label: '0007-1.txt', value: '0007-1.txt'},
-        {label: '0007-2.txt', value: '0007-2.txt'},
-        {label: '0007-3.txt', value: '0007-3.txt'},
-        {label: '0008-1.txt', value: '0008-1.txt'},
-        {label: '0008-2.txt', value: '0008-2.txt'},
-        {label: '0008-3.txt', value: '0008-3.txt'},
-        {label: '0009-1.txt', value: '0009-1.txt'},
-        {label: '0009-2.txt', value: '0009-2.txt'},
-        {label: '0009-3.txt', value: '0009-3.txt'},
-    ]);
-
+    const [value, setValue] = React.useState('None');
     const [checked, setChecked] = React.useState('None')
     const [detected, setDetected] = React.useState('None')
     const [status, setStatus] = React.useState({file: 'None', result: 'None'})
@@ -49,7 +48,7 @@ export default function CAFScreen({ navigation } : {navigation:any})
 
     const onPressHandler = () =>
     {
-        navigation.navigate('Continuous AF Sample List');
+        navigation.navigate('Continuous AF ECG Sample List');
     }
 
     return (
@@ -58,7 +57,10 @@ export default function CAFScreen({ navigation } : {navigation:any})
     // </View>
     <ScrollView>
         <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Atrial Fibrillation Detection Test</Text>
+            <Text style={styles.sectionDescription}>
+                Takes in a continuous ECG measurement output file and 
+                uses the tf.lite model (every 30 seconds) to make a prediction.
+            </Text>
             <View style={styles.customContainer}>
                 <Button title="Change File" onPress={onPressHandler}></Button>
                 <Text style={styles.sectionDescription}>File: {value}</Text>
@@ -67,20 +69,6 @@ export default function CAFScreen({ navigation } : {navigation:any})
                 <Button title="Detect" onPress={onClickDetect}></Button>
                 <Text style={styles.sectionDescription}>Detected: {detected}</Text>
             </View>
-            <View style={styles.customContainer}>
-                {/* <Text style={styles.sectionDescription}>File: {value}</Text> */}
-                {/* <Text style={styles.sectionDescription}>Detected: {detected}</Text> */}
-            </View>
-            {/* <View style={styles.customContainer}>
-                <DropDownPicker
-                open={open}
-                value={value}
-                items={items}
-                setOpen={setOpen}
-                setValue={setValue}
-                setItems={setItems}
-                />
-            </View> */}
         </View>
     </ScrollView>
     );

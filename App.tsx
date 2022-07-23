@@ -4,15 +4,13 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import HomeScreen from './src/screens/HomeScreen';
 import AFScreen from './src/screens/AFScreen';
-import { AFSampleScreen } from './src/screens/AFScreen';
+import AFStackNavigation from './src/screens/AFScreen';
 import CAFScreen from './src/screens/CAFScreen';
-import { CAFSampleScreen } from './src/screens/CAFScreen';
+import CAFStackNavigation, { CAFSampleScreen } from './src/screens/CAFScreen';
 
-import { NavigationContainer, StackActions } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function App()
@@ -21,40 +19,32 @@ function App()
 
   return (
     <NavigationContainer>
-      {/* <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="AF Detection" component={AFScreen} />
-        <Stack.Screen name="Continuous AF Detection" component={CAFScreen} />
-      </Stack.Navigator> */}
-      {/* <Stack.Navigator>
-        <Stack.Screen name="AF Sample List" component={AFSampleScreen} />
-        <Stack.Screen name="Continuous AF Sample List" component={CAFSampleScreen} />
-      </Stack.Navigator> */}
       <Tab.Navigator screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, size }) => {
-          let iconName='';
-          if (route.name==="Home")
-          {
-              iconName = 'house-chimney';
-              size = focused ? 25 : 20;
-          }
-          else if (route.name==="AF Detection")
-          {
-            iconName = 'wave-pulse';
-            size = focused ? 25 : 20;
-          }
-          else if (route.name==="Continuous AF Detection")
-          {
-            iconName = 'heart-pulse';
-            size = focused ? 25 : 20;
-          }
-          return (
-            <FontAwesome5
-              name={iconName}
-              size={size}
-            />
-          )
-        }
+        header: () => null,
+        // tabBarIcon: ({ focused, size }) => {
+        //   let iconName='';
+        //   if (route.name==="Home")
+        //   {
+        //       iconName = 'house-chimney';
+        //       size = focused ? 25 : 20;
+        //   }
+        //   else if (route.name==="AF Screen")
+        //   {
+        //     iconName = 'wave-pulse';
+        //     size = focused ? 25 : 20;
+        //   }
+        //   else if (route.name==="Continuous AF Screen")
+        //   {
+        //     iconName = 'heart-pulse';
+        //     size = focused ? 25 : 20;
+        //   }
+        //   return (
+        //     <FontAwesome5
+        //       name={iconName}
+        //       size={size}
+        //     />
+        //   )
+        // }
       })}
       // screenOptions=
       // {{
@@ -63,8 +53,8 @@ function App()
       // }}
       >
         <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="AF Detection" component={AFScreen} />
-        <Tab.Screen name="Continuous AF Detection" component={CAFScreen} />
+        <Tab.Screen name="AF Screen" component={AFStackNavigation} options={{headerShown: false}}/>
+        <Tab.Screen name="Continuous AF Screen" component={CAFStackNavigation} options={{headerShown: false}}/>
       </Tab.Navigator>
     </NavigationContainer>
   );

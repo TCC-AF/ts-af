@@ -21,8 +21,10 @@ export default function HomeScreen({ navigation } : {navigation:any})
     return (
     // <ScrollView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
     <ScrollView>
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={styles.sectionTitle}>Stats Info</Text>
+        {/* <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}> */}
+        <View style={styles.sectionContainer}>
+            <Text style={styles.Title}>AF Detection Prototype {"\n. . . . . . ."}</Text>
+            <Text style={styles.sectionTitle}>{">> Stats Info"}</Text>
             <Text style={styles.sectionDescription}>
                 Prediction List {"\n"}
                 1 - Atrial Fibrillation {"\n"}
@@ -33,7 +35,7 @@ export default function HomeScreen({ navigation } : {navigation:any})
                 0 - Reliable {"\n"}
                 1 - Unreliable {"\n"}
             </Text>
-            <Text style={styles.sectionTitle}>Expected</Text>
+            <Text style={styles.sectionTitle}>{">> Expected"}</Text>
             <DataTable>
                 <DataTable.Header>
                     <DataTable.Title>Filename</DataTable.Title>
