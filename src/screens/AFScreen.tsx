@@ -1,8 +1,8 @@
-import React, {type PropsWithChildren} from 'react';
+import React, {type PropsWithChildren, useState, createContext, useContext} from 'react';
 import styles from '../components/CustomStyle';
 import Radio from '../components/RadioButton';
 import { RadioButton } from 'react-native-paper';
-import { TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { TouchableOpacity, Image, StyleSheet, RefreshControl } from 'react-native';
 
 import {
     Button,
@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer, StackActions, useRoute } from '@react-navigation/native';
+import { useFocusEffect} from '@react-navigation/native';
 const Stack = createNativeStackNavigator();
 
 export default function AFStackNavigation()
@@ -30,27 +30,25 @@ export default function AFStackNavigation()
     )
 }
 
-export class AFComponent
+const File = {value:'None'}
+
+export class AFScreen
 {
-    // protected value:any = 'None';
     constructor(){}
 
-    // getSet()
-    // {
-    //     let value = () => this.value;
-    //     function getValue(){return value;}
-    //     function setValue(value_:any){value = value_;}
-    // }
-}
-
-export class AFScreen extends AFComponent
-{
-    constructor(){super();}
-    
     SampleScreen()
     {
-        const [value, setValue] = React.useState('None');
-        
+        const [value, setValue] = React.useState(File.value);
+
+        // const [, updateState] = React.useState({});
+        // const forceUpdate = React.useCallback(() => updateState({}), []);
+
+        const onValueChangeHandler = (newValue:any) =>
+        {
+            setValue(newValue);
+            File.value = newValue;
+        }
+
         return (
             <ScrollView>
                 <View style={styles.sectionContainer}>
@@ -60,7 +58,7 @@ export class AFScreen extends AFComponent
                     </Text>
                     <Text style={styles.sectionTitle}>{">> Choose Sample File"}</Text>
                     <RadioButton.Group
-                    onValueChange={(newValue) => setValue(newValue)}
+                    onValueChange={(newValue) => onValueChangeHandler(newValue)}
                     value={value}>
                         <RadioButton.Item label="ecg.json" value="ecg.json"/>
                         <RadioButton.Item label="0006-6.txt" value="0006-6.txt"/>
@@ -74,6 +72,9 @@ export class AFScreen extends AFComponent
                         <RadioButton.Item label="0009-2.txt" value="0009-2.txt"/>
                         <RadioButton.Item label="0009-3.txt" value="0009-3.txt"/>
                     </RadioButton.Group>
+                    {/* <Text>{"File is now set to: "+File.value}</Text> */}
+                    {/* <Button title="Confirm" onPress={onPressHandler}></Button> */}
+                    {/* <Text>{"\n"}</Text> */}
                 </View>
             </ScrollView>
         )
@@ -81,10 +82,11 @@ export class AFScreen extends AFComponent
 
     MainScreen ({ navigation } : {navigation:any})
     {
-        // const [value, setValue] = React.useState('None');
-        // const [checked, setChecked] = React.useState('None')
         const [detected, setDetected] = React.useState('None')
-        // const [status, setStatus] = React.useState({file: 'None', result: 'None'})
+        const [, updateState] = React.useState({});
+        const forceUpdate = React.useCallback(() => updateState({}), []);
+
+        useFocusEffect(forceUpdate);
 
         const onClickDetect = () =>
         {
@@ -99,14 +101,14 @@ export class AFScreen extends AFComponent
         return (
         <ScrollView>
             <View style={styles.sectionContainer}>
+                {/* <Button title="Force Refresh" onPress={forceUpdate}></Button> */}
                 <Text style={styles.sectionDescription}>
                     Takes in a 30 second ECG measurement output file and 
                     uses the tf.lite model to make a prediction.
                 </Text>
                 <View style={styles.customContainer}>
                     <Button title="Change File" onPress={onPressHandler}></Button>
-                    <Text>File: {value}</Text>
-                    {/* <Text style={styles.sectionDescription}>File: {this.getValue}</Text> */}
+                    <Text style={styles.sectionDescription}>File: {File.value}</Text>
                 </View>
                 <View style={styles.customContainer}>
                     <Button title="Detect" onPress={onClickDetect}></Button>
@@ -117,6 +119,19 @@ export class AFScreen extends AFComponent
         );
     }
 }
+
+// export class AFComponent
+// {
+//     // protected value:any = 'None';
+//     constructor(){}
+
+//     // getSet()
+//     // {
+//     //     let value = () => this.value;
+//     //     function getValue(){return value;}
+//     //     function setValue(value_:any){value = value_;}
+//     // }
+// }
 
 // export function AFSampleScreen()
 // {
