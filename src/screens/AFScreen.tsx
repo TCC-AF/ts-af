@@ -15,7 +15,12 @@ import {
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFocusEffect} from '@react-navigation/native';
+import * as tf from '@tensorflow/tfjs';
+import * as tflite from '@tensorflow/tfjs-tflite';
+import * as tfrn from '@tensorflow/tfjs-react-native';
+
 const Stack = createNativeStackNavigator();
+const File = {value:'None'}
 
 export default function AFStackNavigation()
 {
@@ -30,7 +35,26 @@ export default function AFStackNavigation()
     )
 }
 
-const File = {value:'None'}
+export async function RunPrediction()
+{
+    // const model = await tflite.loadTFLiteModel("https://1drv.ms/u/s!AhwQNlQ3dXFkiuN3XSV49evRF_li5w?e=Ho1lhy");
+    // const model = await tflite.loadTFLiteModel("https://tfhub.dev/tensorflow/lite-model/mobilenet_v2_1.0_224/1/metadata/1");
+    // const modeltf = await tfrn.bundleResourceIO
+    // console.log(model);
+    // console.log('end');
+
+    // const outputTensor = tf.tidy(() => {
+    //     // Get pixels data from an image.
+    //     const img = tf.browser.fromPixels(document.querySelector('img'));
+    //     // Normalize (might also do resize here if necessary).
+    //     const input = tf.sub(tf.div(tf.expandDims(img), 127.5), 1);
+    //     // Run the inference.
+    //     let outputTensor = model.predict(input) as tf.Tensor;
+    //     // De-normalize the result.
+    //     return tf.mul(tf.add(outputTensor, 1), 127.5)
+    // });
+    // console.log(outputTensor);  
+}
 
 export class AFScreen
 {
@@ -47,6 +71,7 @@ export class AFScreen
         {
             setValue(newValue);
             File.value = newValue;
+            RunPrediction();
         }
 
         return (

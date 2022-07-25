@@ -62,3 +62,4 @@ buck-out/
 /ios/Pods/
 /vendor/bundle/
 src/modules/af/model_custom.tflite
+*.tflite
