@@ -3,6 +3,7 @@ import styles from '../components/CustomStyle';
 import Radio from '../components/RadioButton';
 import { RadioButton } from 'react-native-paper';
 import { TouchableOpacity, Image, StyleSheet, RefreshControl } from 'react-native';
+import * as RNFS from 'react-native-fs';
 
 import {
     Button,
@@ -20,7 +21,20 @@ import * as tflite from '@tensorflow/tfjs-tflite';
 import * as tfrn from '@tensorflow/tfjs-react-native';
 
 const Stack = createNativeStackNavigator();
-const File = {value:'None'}
+const File = {value:'None'};
+const JSON5 = require('json5');
+
+// import file66 from '../assets/samples/0006-6.txt';
+// import file71 from '../assets/samples/0007-1.txt';
+// import file72 from '../assets/samples/0007-2.txt';
+// import file73 from '../assets/samples/0007-3.txt';
+// import file81 from '../assets/samples/0008-1.txt';
+// import file82 from '../assets/samples/0008-2.txt';
+// import file83 from '../assets/samples/0008-3.txt';
+// import file91 from '../assets/samples/0009-1.txt';
+// import file92 from '../assets/samples/0009-2.txt';
+// import file93 from '../assets/samples/0009-3.txt';
+import fileecg from '../assets/samples/ecg.json';
 
 export default function AFStackNavigation()
 {
@@ -35,8 +49,8 @@ export default function AFStackNavigation()
     )
 }
 
-export async function RunPrediction()
-{
+// export async function RunPrediction()
+// {
     // const model = await tflite.loadTFLiteModel("https://1drv.ms/u/s!AhwQNlQ3dXFkiuN3XSV49evRF_li5w?e=Ho1lhy");
     // const model = await tflite.loadTFLiteModel("https://tfhub.dev/tensorflow/lite-model/mobilenet_v2_1.0_224/1/metadata/1");
     // const modeltf = await tfrn.bundleResourceIO
@@ -54,7 +68,7 @@ export async function RunPrediction()
     //     return tf.mul(tf.add(outputTensor, 1), 127.5)
     // });
     // console.log(outputTensor);  
-}
+// }
 
 export class AFScreen
 {
@@ -71,7 +85,7 @@ export class AFScreen
         {
             setValue(newValue);
             File.value = newValue;
-            RunPrediction();
+            // RunPrediction();
         }
 
         return (
@@ -107,15 +121,98 @@ export class AFScreen
 
     MainScreen ({ navigation } : {navigation:any})
     {
-        const [detected, setDetected] = React.useState('None')
+        const [prediction, setPrediction] = React.useState('None');
+        const [reject, setReject] = React.useState('None');
+        // const [detected, setDetected] = React.useState({ value: [1, 2]})
         const [, updateState] = React.useState({});
         const forceUpdate = React.useCallback(() => updateState({}), []);
+        const [post, setPost] = React.useState({ postId: 0})
 
         useFocusEffect(forceUpdate);
 
-        const onClickDetect = () =>
+        const checkPrediction = (value:any) =>
         {
-            setDetected(detected)
+            switch(value)
+            {
+                case 1: setPrediction('Atrial Fibrillation'); break;
+                case 2: setPrediction('Normal Sinus Rhythm'); break;
+                case 3: setPrediction('Other Arrhytmia'); break;
+                case 4: setPrediction('Too Noisy'); break;
+            }
+        }
+
+        const checkRejection = (value:any) =>
+        {
+            if(value == 0)
+                setReject('Reliable');
+            else if (value == 1)
+                setReject('Unreliable');
+        }
+
+        const onClickDetect = async() =>
+        {
+            const requestOptions = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ "value": fileecg[3] })
+                // body: JSON.stringify({ value: [1, 2, 3, 4, 5] })
+            };
+            fetch("https://detect-af.azurewebsites.net/api/ecg-predict?code=serBnqELEn8-B03IlFAzEe8Q1Wy0RA_TAHoZTkB5caLNAzFuX6udzw==", requestOptions)
+                .then(response => response.json())
+                // .then(data => setDetected(data.prediction));
+                .then(data => checkPrediction(data.prediction));
+
+                // .then(data => console.log(data));
+
+            // try {
+            //     const response = await fetch("https://detect-af.azurewebsites.net/api/ecg-predict?code=serBnqELEn8-B03IlFAzEe8Q1Wy0RA_TAHoZTkB5caLNAzFuX6udzw==", requestOptions)
+            //     // const responseJson = await response;
+            //     const responseJson = response.json();
+            //     // JSON.stringify(JSON5.parse(response))
+            //     console.log(responseJson)
+            // } catch(error){
+            //     console.error(error);
+            // }
+
+            // fetch('https://reqres.in/api/posts', requestOptions)
+            // body: JSON.stringify({ value: 'React POST Request Example' })
+                
+            // return responseJson.prediction;
+                // console.log(responseJson)
+            // "https://ecg-af.azurewebsites.net/api/ecg-predict?code=c0WyeLH4bBl4S6mUKjQ_j0_UKAQ-0A4IqcF8BirxNj4JAzFu8oGYHA==", requestOptions)
+                // .then(response => console.log(response))
+                // .then(response => response.json())
+                // .then(data => console.log(data));
+                // .then(data => setPost({ postId: data.id }));
+            //     .then(data => setDetected(data))
+            // console.log(fileecg[3]);
+            // fetch(file66)
+            // .then(r => r.text())
+            // .then(text => {
+            //     console.log('text decoded:', text);
+            // });
+
+            // const myreq = {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({ value: [1, 2, 3] })
+            // };
+            // fetch("https://ecg-af.azurewebsites.net/api/ecg-predict?code=c0WyeLH4bBl4S6mUKjQ_j0_UKAQ-0A4IqcF8BirxNj4JAzFu8oGYHA==", myreq)
+
+            // fetch('https://ecg-af.azurewebsites.net/api/ecg-predict?code=c0WyeLH4bBl4S6mUKjQ_j0_UKAQ-0A4IqcF8BirxNj4JAzFu8oGYHA==', {
+            //     method: 'POST',
+            //     headers: {
+            //         Accept: 'application/json',
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify({
+            //         value: fileecg[3]
+            //     })
+            // })
+            // .then(res=>{console.log(res.json())});
+            // .then(response=>response.json());
+            // .then(response=>setDetected(JSON.stringify(response.json())));
+            // .then(data=>setDetected(JSON.stringify(data)));
         }
 
         const onPressHandler = () =>
@@ -136,8 +233,10 @@ export class AFScreen
                     <Text style={styles.sectionDescription}>File: {File.value}</Text>
                 </View>
                 <View style={styles.customContainer}>
+                    {/* <Button title="Detect" onPress={onClickDetect}></Button> */}
                     <Button title="Detect" onPress={onClickDetect}></Button>
-                    <Text style={styles.sectionDescription}>Detected: {detected}</Text>
+                    <Text style={styles.sectionDescription}>Detected: {prediction}</Text>
+                    {/* <Text style={styles.sectionDescription}>PostID: {post.postId}</Text> */}
                 </View>
             </View>
         </ScrollView>
