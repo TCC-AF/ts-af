@@ -22,7 +22,6 @@ import * as tfrn from '@tensorflow/tfjs-react-native';
 
 const Stack = createNativeStackNavigator();
 const File = {value:'None'};
-const JSON5 = require('json5');
 
 // import file66 from '../assets/samples/0006-6.txt';
 // import file71 from '../assets/samples/0007-1.txt';
@@ -48,27 +47,6 @@ export default function AFStackNavigation()
         </Stack.Navigator>
     )
 }
-
-// export async function RunPrediction()
-// {
-    // const model = await tflite.loadTFLiteModel("https://1drv.ms/u/s!AhwQNlQ3dXFkiuN3XSV49evRF_li5w?e=Ho1lhy");
-    // const model = await tflite.loadTFLiteModel("https://tfhub.dev/tensorflow/lite-model/mobilenet_v2_1.0_224/1/metadata/1");
-    // const modeltf = await tfrn.bundleResourceIO
-    // console.log(model);
-    // console.log('end');
-
-    // const outputTensor = tf.tidy(() => {
-    //     // Get pixels data from an image.
-    //     const img = tf.browser.fromPixels(document.querySelector('img'));
-    //     // Normalize (might also do resize here if necessary).
-    //     const input = tf.sub(tf.div(tf.expandDims(img), 127.5), 1);
-    //     // Run the inference.
-    //     let outputTensor = model.predict(input) as tf.Tensor;
-    //     // De-normalize the result.
-    //     return tf.mul(tf.add(outputTensor, 1), 127.5)
-    // });
-    // console.log(outputTensor);  
-// }
 
 export class AFScreen
 {
@@ -132,7 +110,13 @@ export class AFScreen
 
         const checkPrediction = (value:any) =>
         {
-            switch(value)
+            if(!value.prediction)
+            {
+                setPrediction(JSON.stringify(value));
+                return;
+            }
+
+            switch(value.prediction)
             {
                 case 1: setPrediction('Atrial Fibrillation'); break;
                 case 2: setPrediction('Normal Sinus Rhythm'); break;
@@ -143,9 +127,9 @@ export class AFScreen
 
         const checkRejection = (value:any) =>
         {
-            if(value == 0)
+            if(value.prediction == 0)
                 setReject('Reliable');
-            else if (value == 1)
+            else if (value.prediction == 1)
                 setReject('Unreliable');
         }
 
@@ -154,65 +138,12 @@ export class AFScreen
             const requestOptions = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ "value": fileecg[3] })
-                // body: JSON.stringify({ value: [1, 2, 3, 4, 5] })
+                // body: JSON.stringify({ "value": fileecg[3] })
+                body: JSON.stringify({ value: [1, 2, 3] })
             };
             fetch("https://detect-af.azurewebsites.net/api/ecg-predict?code=serBnqELEn8-B03IlFAzEe8Q1Wy0RA_TAHoZTkB5caLNAzFuX6udzw==", requestOptions)
                 .then(response => response.json())
-                // .then(data => setDetected(data.prediction));
-                .then(data => checkPrediction(data.prediction));
-
-                // .then(data => console.log(data));
-
-            // try {
-            //     const response = await fetch("https://detect-af.azurewebsites.net/api/ecg-predict?code=serBnqELEn8-B03IlFAzEe8Q1Wy0RA_TAHoZTkB5caLNAzFuX6udzw==", requestOptions)
-            //     // const responseJson = await response;
-            //     const responseJson = response.json();
-            //     // JSON.stringify(JSON5.parse(response))
-            //     console.log(responseJson)
-            // } catch(error){
-            //     console.error(error);
-            // }
-
-            // fetch('https://reqres.in/api/posts', requestOptions)
-            // body: JSON.stringify({ value: 'React POST Request Example' })
-                
-            // return responseJson.prediction;
-                // console.log(responseJson)
-            // "https://ecg-af.azurewebsites.net/api/ecg-predict?code=c0WyeLH4bBl4S6mUKjQ_j0_UKAQ-0A4IqcF8BirxNj4JAzFu8oGYHA==", requestOptions)
-                // .then(response => console.log(response))
-                // .then(response => response.json())
-                // .then(data => console.log(data));
-                // .then(data => setPost({ postId: data.id }));
-            //     .then(data => setDetected(data))
-            // console.log(fileecg[3]);
-            // fetch(file66)
-            // .then(r => r.text())
-            // .then(text => {
-            //     console.log('text decoded:', text);
-            // });
-
-            // const myreq = {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ value: [1, 2, 3] })
-            // };
-            // fetch("https://ecg-af.azurewebsites.net/api/ecg-predict?code=c0WyeLH4bBl4S6mUKjQ_j0_UKAQ-0A4IqcF8BirxNj4JAzFu8oGYHA==", myreq)
-
-            // fetch('https://ecg-af.azurewebsites.net/api/ecg-predict?code=c0WyeLH4bBl4S6mUKjQ_j0_UKAQ-0A4IqcF8BirxNj4JAzFu8oGYHA==', {
-            //     method: 'POST',
-            //     headers: {
-            //         Accept: 'application/json',
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({
-            //         value: fileecg[3]
-            //     })
-            // })
-            // .then(res=>{console.log(res.json())});
-            // .then(response=>response.json());
-            // .then(response=>setDetected(JSON.stringify(response.json())));
-            // .then(data=>setDetected(JSON.stringify(data)));
+                .then(data => checkPrediction(data));
         }
 
         const onPressHandler = () =>
@@ -288,4 +219,25 @@ export class AFScreen
 //             </View>
 //         </ScrollView>
 //     )
+// }
+
+// export async function RunPrediction()
+// {
+    // const model = await tflite.loadTFLiteModel("https://1drv.ms/u/s!AhwQNlQ3dXFkiuN3XSV49evRF_li5w?e=Ho1lhy");
+    // const model = await tflite.loadTFLiteModel("https://tfhub.dev/tensorflow/lite-model/mobilenet_v2_1.0_224/1/metadata/1");
+    // const modeltf = await tfrn.bundleResourceIO
+    // console.log(model);
+    // console.log('end');
+
+    // const outputTensor = tf.tidy(() => {
+    //     // Get pixels data from an image.
+    //     const img = tf.browser.fromPixels(document.querySelector('img'));
+    //     // Normalize (might also do resize here if necessary).
+    //     const input = tf.sub(tf.div(tf.expandDims(img), 127.5), 1);
+    //     // Run the inference.
+    //     let outputTensor = model.predict(input) as tf.Tensor;
+    //     // De-normalize the result.
+    //     return tf.mul(tf.add(outputTensor, 1), 127.5)
+    // });
+    // console.log(outputTensor);  
 // }
