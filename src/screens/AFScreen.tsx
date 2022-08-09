@@ -16,9 +16,6 @@ import {
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFocusEffect} from '@react-navigation/native';
-import * as tf from '@tensorflow/tfjs';
-import * as tflite from '@tensorflow/tfjs-tflite';
-import * as tfrn from '@tensorflow/tfjs-react-native';
 
 const Stack = createNativeStackNavigator();
 const File = {value:'None'};
