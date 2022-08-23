@@ -3,7 +3,8 @@ import styles from '../components/CustomStyle';
 import Radio from '../components/RadioButton';
 import { RadioButton } from 'react-native-paper';
 import { TouchableOpacity, Image, StyleSheet, RefreshControl } from 'react-native';
-import * as RNFS from 'react-native-fs';
+// import * as RNFS from 'react-native-fs';
+import RNFS from 'react-native-fs';
 
 import {
     Button,
@@ -30,7 +31,7 @@ const File = {value:'None'};
 // import file91 from '../assets/samples/0009-1.txt';
 // import file92 from '../assets/samples/0009-2.txt';
 // import file93 from '../assets/samples/0009-3.txt';
-import fileecg from '../assets/samples/ecg.json';
+// import fileecg from '../assets/samples/ecg.json';
 
 export default function AFStackNavigation()
 {
@@ -43,6 +44,36 @@ export default function AFStackNavigation()
             <Stack.Screen name="AF ECG Sample List" component={afscreen.SampleScreen} />
         </Stack.Navigator>
     )
+}
+
+async function getSampleJson()
+{
+    return fetch('https://raw.githubusercontent.com/ItsLame/ts-af/main/src/assets/samples/ecg.json?token=GHSAT0AAAAAABWIDSQXEXA7V4N2URV5OMDSYYEXRTQ')
+        .then((response) => response.json())
+        .then((responseJson) => {
+            return responseJson[3];
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+}
+
+async function getSampleText()
+{
+    const requestOptions = {
+            method: 'GET',
+            headers: { 'Content-Type': 'text/plain' },
+        };
+    return fetch('https://raw.githubusercontent.com/ItsLame/ts-af/main/src/assets/samples/0006-6.txt?token=GHSAT0AAAAAABWIDSQWDYCOWAWWSTQQQWNKYYEZBPA', requestOptions)
+        .then((response) => {
+            return response.text().then(text => {
+                // console.log(text.split('\n').map(Number));
+                return (text.split('\n').map(Number));
+            });
+        })
+        .catch((error) => {
+            console.error(error);
+        });
 }
 
 export class AFScreen
@@ -101,8 +132,33 @@ export class AFScreen
         // const [detected, setDetected] = React.useState({ value: [1, 2]})
         const [, updateState] = React.useState({});
         const forceUpdate = React.useCallback(() => updateState({}), []);
-        const [post, setPost] = React.useState({ postId: 0})
+        const [post, setPost] = React.useState({ postId: 0 })
 
+        // read file
+        const [content, setContent] = useState(null);
+
+        const readFile = () => {
+            RNFS.readDir(RNFS.DocumentDirectoryPath)
+            .then((result) => {
+            console.log('GOT RESULT', result);
+            return Promise.all([RNFS.stat(result[0].path), result[0].path]);
+            })
+            .then((statResult) => {
+                if (statResult[0].isFile()) {
+                    return RNFS.readFile(statResult[1], 'utf8');
+                }
+                return 'no file';
+            })
+            .then((contents:any) => {
+                setContent(contents);
+                console.log(contents);
+            })
+            .catch((err) => {
+                console.log(err.message, err.code);
+            });
+        }
+        // end read file
+        
         useFocusEffect(forceUpdate);
 
         const checkPrediction = (value:any) =>
@@ -135,8 +191,9 @@ export class AFScreen
             const requestOptions = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                // body: JSON.stringify({ "value": fileecg[3] })
-                body: JSON.stringify({ value: [1, 2, 3] })
+                // body: JSON.stringify({ value: await getSampleJson() })
+                body: JSON.stringify({ value: await getSampleText() })
+                // body: JSON.stringify({ value: [1, 2, 3] })
             };
             fetch("https://detect-af.azurewebsites.net/api/ecg-predict?code=serBnqELEn8-B03IlFAzEe8Q1Wy0RA_TAHoZTkB5caLNAzFuX6udzw==", requestOptions)
                 .then(response => response.json())
@@ -157,8 +214,10 @@ export class AFScreen
                     uses the tf.lite model to make a prediction.
                 </Text>
                 <View style={styles.customContainer}>
-                    <Button title="Change File" onPress={onPressHandler}></Button>
-                    <Text style={styles.sectionDescription}>File: {File.value}</Text>
+                    {/* <Button title="Change File" onPress={onPressHandler}></Button> */}
+                    <Button title="Change File" onPress={readFile}></Button>
+                    {/* <Text style={styles.sectionDescription}>File: {File.value}</Text> */}
+                    <Text style={styles.sectionDescription}>File: {content}</Text>
                 </View>
                 <View style={styles.customContainer}>
                     {/* <Button title="Detect" onPress={onClickDetect}></Button> */}
