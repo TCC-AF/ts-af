@@ -21,6 +21,7 @@ import { useFocusEffect} from '@react-navigation/native';
 const Stack = createNativeStackNavigator();
 const File = {value:'None'};
 
+// import fileecg from '../assets/samples/ecg.json';
 // import file66 from '../assets/samples/0006-6.txt';
 // import file71 from '../assets/samples/0007-1.txt';
 // import file72 from '../assets/samples/0007-2.txt';
@@ -60,11 +61,18 @@ async function getSampleJson()
 
 async function getSampleText()
 {
+    // const myMarkdownFile = require("./test.txt");
+
+    // fetch('/test.txt')
+    //     .then(response => response.text())
+    //     .then(text => console.log(text))
     const requestOptions = {
             method: 'GET',
             headers: { 'Content-Type': 'text/plain' },
         };
-    return fetch('https://raw.githubusercontent.com/ItsLame/ts-af/main/src/assets/samples/0006-6.txt?token=GHSAT0AAAAAABWIDSQWDYCOWAWWSTQQQWNKYYEZBPA', requestOptions)
+    // // return fetch('https://raw.githubusercontent.com/ItsLame/ts-af/main/src/assets/samples/0006-6.txt?token=GHSAT0AAAAAABWIDSQWDYCOWAWWSTQQQWNKYYEZBPA', requestOptions)
+    // return fetch('https://raw.githubusercontent.com/ItsLame/ts-af/main/src/assets/samples/0006-6.txt?token=GHSAT0AAAAAABWIDSQWNW4RQD4WYAJJU4TUYYE3N6A', requestOptions)
+    return fetch('https://raw.githubusercontent.com/ItsLame/ts-af/main/src/assets/samples/0006-6.txt?token=GHSAT0AAAAAABWIDSQXTF5BJEU4TKKNJDSQYYFS7RA', requestOptions)
         .then((response) => {
             return response.text().then(text => {
                 // console.log(text.split('\n').map(Number));
@@ -176,18 +184,25 @@ export class AFScreen
                 case 3: setPrediction('Other Arrhytmia'); break;
                 case 4: setPrediction('Too Noisy'); break;
             }
+
+            if(value.reject == 0)
+                setReject('Reliable');
+            else if (value.reject == 1)
+                setReject('Unreliable');
         }
 
         const checkRejection = (value:any) =>
         {
-            if(value.prediction == 0)
+            if(value.reject == 0)
                 setReject('Reliable');
-            else if (value.prediction == 1)
+            else if (value.reject == 1)
                 setReject('Unreliable');
         }
 
         const onClickDetect = async() =>
         {
+            // await getSampleText();
+
             const requestOptions = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -223,6 +238,7 @@ export class AFScreen
                     {/* <Button title="Detect" onPress={onClickDetect}></Button> */}
                     <Button title="Detect" onPress={onClickDetect}></Button>
                     <Text style={styles.sectionDescription}>Detected: {prediction}</Text>
+                    <Text style={styles.sectionDescription}>Reject Status: {reject}</Text>
                     {/* <Text style={styles.sectionDescription}>PostID: {post.postId}</Text> */}
                 </View>
             </View>
