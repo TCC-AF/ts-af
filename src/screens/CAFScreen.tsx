@@ -9,11 +9,22 @@ import {
     useColorScheme,
     View,
     ScrollView,
+    Touchable,
+    TouchableOpacity,
 } from 'react-native';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer, StackActions } from '@react-navigation/native';
+import { white } from 'react-native-paper/lib/typescript/styles/colors';
+
 const Stack = createNativeStackNavigator();
+const currFile = {value: 'None'};
+const File = {value:'None'};
+// const FileList = ['sample.json'];
+const FileList = ['sample.json', '0006-6.txt', '0007-1.txt', '0007-2.txt', '0007-3.txt',
+                    '0008-1.txt', '0008-2.txt', '0008-3.txt', '0009-1.txt', '0009-2.txt', '0009-3.txt'];
+var FileFormat = 'json';
+var isStart = false;
 
 export default function CAFStackNavigation()
 {
@@ -34,27 +45,209 @@ export function CAFSampleScreen({ navigation } : {navigation:any})
     )
 }
 
+async function readFromSample()
+{
+    var fetchURL = 'https://raw.githubusercontent.com/ItsLame/samples/main/readings/' + File.value;
+
+    if(FileFormat == 'json')
+    {
+        return fetch(fetchURL)
+        .then((response) => response.json())
+        .then((responseJson) => {
+            return responseJson[3];
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+    }
+    else if(FileFormat == 'txt')
+    {
+        const requestOptions = {
+            method: 'GET',
+            headers: { 'Content-Type': 'text/plain' },
+        };
+        return fetch(fetchURL, requestOptions)
+        .then((response) => {
+            return response.text().then(text => {
+                // console.log(text.split('\n').map(Number));
+                return (text.split('\n').map(Number));
+            });
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+    }
+}
+
 export function CAFScreen({ navigation } : {navigation:any})
 {
-    const [value, setValue] = React.useState('None');
-    const [checked, setChecked] = React.useState('None')
-    const [detected, setDetected] = React.useState('None')
-    const [status, setStatus] = React.useState({file: 'None', result: 'None'})
+    var myTimer = 30;
+    const [prediction, setPrediction] = React.useState('None');
+    const [reject, setReject] = React.useState('None');
+    const [counter, setCounter] = React.useState(myTimer);
+    const [startCounter, setStartCounter] = React.useState(false);
 
-    const onClickDetect = () =>
+    const [done, setDone] = React.useState(false);
+    const [prog, setProg] = React.useState('Idle')
+    const [index, setIndex] = React.useState(0);
+
+    React.useEffect(() =>
     {
-        setDetected(detected)
+        if(startCounter)
+        {
+            const timer = counter >= 0 && setInterval(() => setCounter(counter - 1), 1000);
+
+            if(counter < 0)
+            {
+                readSimulation();
+                contDetect();
+                // setDone(false);
+                setCounter(myTimer);
+            }
+
+            return () => clearInterval(timer);
+        }
+    }
+    ), [counter, startCounter]
+
+    const checkPrediction = (value:any) =>
+    {
+        setProg('Checking...');
+
+        if(!value.prediction)
+        {
+            setPrediction(JSON.stringify(value));
+            return;
+        }
+
+        switch(value.prediction)
+        {
+            case 1: setPrediction('Atrial Fibrillation'); break;
+            case 2: setPrediction('Normal Sinus Rhythm'); break;
+            case 3: setPrediction('Other Arrhytmia'); break;
+            case 4: setPrediction('Too Noisy'); break;
+        }
+
+        if(value.reject == 0)
+            setReject('Reliable');
+        else if (value.reject == 1)
+            setReject('Unreliable');
+
+        setDone(true);
+        setProg('Success!');
+        setTimeout(() => {setProg('Measuring...')}, 1000);
     }
 
-    const onPressHandler = () =>
+    const onDetect = async(simulatedValue:number[]) =>
     {
-        navigation.navigate('Continuous AF ECG Sample List');
+        // console.log(simulatedValue.length);
+        // console.log(simulatedValue[0]);
+        // console.log(simulatedValue[1]);
+        setPrediction('None');
+        setReject('None');
+
+        setProg('Inputting data...');
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            // body: JSON.stringify({ value: await getSampleJson() })
+            body: JSON.stringify({ value: simulatedValue })
+            // body: JSON.stringify({ value: [1, 2, 3] })
+        };
+        setProg('Predicting...');
+        fetch("https://detect-af.azurewebsites.net/api/ecg-predict?code=serBnqELEn8-B03IlFAzEe8Q1Wy0RA_TAHoZTkB5caLNAzFuX6udzw==", requestOptions)
+            .then(response => response.json())
+            .then(data => checkPrediction(data));
+    }
+
+    const readSimulation = async() =>
+    {
+        var listIndex = 0;
+        let emptyList: number[] = [];
+        let sampleList: number[] = [];
+
+        sampleList = await readFromSample();
+        intervalSimulation(sampleList, emptyList, listIndex)
+    }
+
+    const intervalSimulation = (oldList:number[], newList:number[], listIndex:any) =>
+    {
+        setProg('Measuring...');
+
+        var interval = setInterval(() => {
+            newList.push(oldList[listIndex]);
+            listIndex++;
+
+            if(counter < 0)
+            {
+                setDone(true);
+                detectSimulation(oldList);
+                clearInterval(interval);
+            }
+        }
+        , 30);
+    }
+
+    const detectSimulation = async(newList:number[]) =>
+    {
+        setProg('Reading...');
+        await onDetect(newList);
+    }
+
+    const contDetect = () =>
+    {
+        // console.log('index: ' + index);
+        // console.log('length: ' + FileList.length);
+
+        if(index > FileList.length-1)
+        {
+            // console.log('CHECKER');
+            setIndex(0);
+            // setIndex(index-1);
+            // setIndex(index-1);
+            // console.log('newindex: ' + index);
+        }
+
+        setIndex(0);
+        setProg('Setting file...');
+        File.value = FileList[index];
+        // console.log(FileList[index]);
+        FileFormat = FileList[index].substr(FileList[index].indexOf('.')+1, 4);
+        setIndex(index+1);
+    }
+
+    const onStartHandler = () =>
+    {
+        // navigation.navigate('Continuous AF ECG Sample List');
+        setProg('Starting...');
+        isStart = true;
+        contDetect();
+        setStartCounter(true);
+        readSimulation();
+        // setTimeout(() => {setProg('Waiting for countdown...')}, 1000);
+    }
+
+    const onStopHandler = () =>
+    {
+        setProg('Stopping...');
+        setStartCounter(false);
+        isStart = false;
+        setTimeout(() => {setProg('Idle')}, 1000);
+    }
+
+    const onResetHandler = () =>
+    {
+        setProg('Reseting...');
+        setStartCounter(false);
+        isStart = false;
+        setIndex(0);
+        File.value = 'None';
+        FileFormat = FileList[index].substr(FileList[index].indexOf('.')+1, 4);
+        setCounter(myTimer);
+        setTimeout(() => {setProg('Idle')}, 1000);
     }
 
     return (
-    // <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-    //     <Text>CAF Screen</Text>
-    // </View>
     <ScrollView>
         <View style={styles.sectionContainer}>
             <Text style={styles.sectionDescription}>
@@ -62,12 +255,25 @@ export function CAFScreen({ navigation } : {navigation:any})
                 uses the tf.lite model (every 30 seconds) to make a prediction.
             </Text>
             <View style={styles.customContainer}>
-                <Button title="Change File" onPress={onPressHandler}></Button>
-                <Text style={styles.sectionDescription}>File: {value}</Text>
-            </View>
-            <View style={styles.customContainer}>
-                <Button title="Detect" onPress={onClickDetect}></Button>
-                <Text style={styles.sectionDescription}>Detected: {detected}</Text>
+                <Text style={styles.sectionDescription}>Current File: {File.value}</Text>
+                <Text style={styles.sectionDescription}>Next File: {FileList[index]}</Text>
+                <View style={styles.customGrid22}>
+                    <TouchableOpacity onPress={onStartHandler} style={styles.customButton1}>
+                        <Text style={styles.customButtonText}>Start</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={onStopHandler} style={styles.customButton2}>
+                        <Text style={styles.customButtonText}>Stop</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={onResetHandler} style={styles.customButton3}>
+                        <Text style={styles.customButtonText}>Reset</Text>
+                    </TouchableOpacity>
+                    {/* <Button title="Start" onPress={onPressHandler}></Button> */}
+                    {/* <Button title="Stop" onPress={onClickDetect}></Button> */}
+                </View>
+                <Text style={styles.sectionDescription}>Next Prediction: {counter} seconds</Text>
+                <Text style={styles.sectionDescription}>Status: {prog}</Text>
+                <Text style={styles.sectionDescription}>Detected: {prediction}</Text>
+                <Text style={styles.sectionDescription}>Reject Status: {reject}</Text>
             </View>
         </View>
     </ScrollView>

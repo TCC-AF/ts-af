@@ -157,10 +157,10 @@ export class AFScreen
     {
         const [prediction, setPrediction] = React.useState('None');
         const [reject, setReject] = React.useState('None');
+        const [prog, setProg] = React.useState('Idle')
+        
         const [, updateState] = React.useState({});
         const forceUpdate = React.useCallback(() => updateState({}), []);
-
-        const [prog, setProg] = React.useState('Idle')
         
         useFocusEffect(forceUpdate);
 
@@ -231,14 +231,20 @@ export class AFScreen
                     uses the tf.lite model to make a prediction.
                 </Text>
                 <View style={styles.customContainer}>
-                    <Button title="Change File" onPress={onPressHandler}></Button>
+                    <TouchableOpacity onPress={onPressHandler} style={styles.customButton2}>
+                        <Text style={styles.customButtonText}>Change File</Text>
+                    </TouchableOpacity>
+                    {/* <Button title="Change File" onPress={onPressHandler}></Button> */}
                     {/* <Button title="Change File" onPress={readFile}></Button> */}
                     <Text style={styles.sectionDescription}>File: {File.value}</Text>
                     {/* <Text style={styles.sectionDescription}>File: {content}</Text> */}
                 </View>
                 <View style={styles.customContainer}>
                     {/* <Button title="Detect" onPress={onClickDetect}></Button> */}
-                    <Button title="Detect" onPress={onClickDetect}></Button>
+                    <TouchableOpacity onPress={onClickDetect} style={styles.customButton1}>
+                        <Text style={styles.customButtonText}>Detect</Text>
+                    </TouchableOpacity>
+                    {/* <Button title="Detect" onPress={onClickDetect}></Button> */}
                     <Text style={styles.sectionDescription}>Status: {prog}</Text>
                     <Text style={styles.sectionDescription}>Detected: {prediction}</Text>
                     <Text style={styles.sectionDescription}>Reject Status: {reject}</Text>
