@@ -3,8 +3,6 @@ import styles from '../components/CustomStyle';
 import Radio from '../components/RadioButton';
 import { RadioButton } from 'react-native-paper';
 import { TouchableOpacity, Image, StyleSheet, RefreshControl } from 'react-native';
-// import * as RNFS from 'react-native-fs';
-import RNFS from 'react-native-fs';
 
 import {
     Button,
@@ -163,31 +161,6 @@ export class AFScreen
         const [, updateState] = React.useState({});
         const forceUpdate = React.useCallback(() => updateState({}), []);
         const [post, setPost] = React.useState({ postId: 0 })
-
-        // read file
-        const [content, setContent] = useState(null);
-
-        const readFile = () => {
-            RNFS.readDir(RNFS.DocumentDirectoryPath)
-            .then((result) => {
-            console.log('GOT RESULT', result);
-            return Promise.all([RNFS.stat(result[0].path), result[0].path]);
-            })
-            .then((statResult) => {
-                if (statResult[0].isFile()) {
-                    return RNFS.readFile(statResult[1], 'utf8');
-                }
-                return 'no file';
-            })
-            .then((contents:any) => {
-                setContent(contents);
-                console.log(contents);
-            })
-            .catch((err) => {
-                console.log(err.message, err.code);
-            });
-        }
-        // end read file
         
         useFocusEffect(forceUpdate);
 
@@ -258,70 +231,3 @@ export class AFScreen
         );
     }
 }
-
-// export class AFComponent
-// {
-//     // protected value:any = 'None';
-//     constructor(){}
-
-//     // getSet()
-//     // {
-//     //     let value = () => this.value;
-//     //     function getValue(){return value;}
-//     //     function setValue(value_:any){value = value_;}
-//     // }
-// }
-
-// export function AFSampleScreen()
-// {
-//     const [value, setValue] = React.useState('None');
-
-//     return (
-//         // <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-//         <ScrollView>
-//             <View style={styles.sectionContainer}>
-//                 <Text>
-//                     View Home for more information. {"\n"}
-//                     Current File: {value} {"\n"}
-//                 </Text>
-//                 <Text style={styles.sectionTitle}>{">> Choose Sample File"}</Text>
-//                 <RadioButton.Group
-//                 onValueChange={(newValue) => setValue(newValue)}
-//                 value={value}>
-//                     <RadioButton.Item label="ecg.json" value="ecg.json"/>
-//                     <RadioButton.Item label="0006-6.txt" value="0006-6.txt"/>
-//                     <RadioButton.Item label="0007-1.txt" value="0007-1.txt"/>
-//                     <RadioButton.Item label="0007-2.txt" value="0007-2.txt"/>
-//                     <RadioButton.Item label="0007-3.txt" value="0007-3.txt"/>
-//                     <RadioButton.Item label="0008-1.txt" value="0008-1.txt"/>
-//                     <RadioButton.Item label="0008-2.txt" value="0008-2.txt"/>
-//                     <RadioButton.Item label="0008-3.txt" value="0008-3.txt"/>
-//                     <RadioButton.Item label="0009-1.txt" value="0009-1.txt"/>
-//                     <RadioButton.Item label="0009-2.txt" value="0009-2.txt"/>
-//                     <RadioButton.Item label="0009-3.txt" value="0009-3.txt"/>
-//                 </RadioButton.Group>
-//             </View>
-//         </ScrollView>
-//     )
-// }
-
-// export async function RunPrediction()
-// {
-    // const model = await tflite.loadTFLiteModel("https://1drv.ms/u/s!AhwQNlQ3dXFkiuN3XSV49evRF_li5w?e=Ho1lhy");
-    // const model = await tflite.loadTFLiteModel("https://tfhub.dev/tensorflow/lite-model/mobilenet_v2_1.0_224/1/metadata/1");
-    // const modeltf = await tfrn.bundleResourceIO
-    // console.log(model);
-    // console.log('end');
-
-    // const outputTensor = tf.tidy(() => {
-    //     // Get pixels data from an image.
-    //     const img = tf.browser.fromPixels(document.querySelector('img'));
-    //     // Normalize (might also do resize here if necessary).
-    //     const input = tf.sub(tf.div(tf.expandDims(img), 127.5), 1);
-    //     // Run the inference.
-    //     let outputTensor = model.predict(input) as tf.Tensor;
-    //     // De-normalize the result.
-    //     return tf.mul(tf.add(outputTensor, 1), 127.5)
-    // });
-    // console.log(outputTensor);  
-// }
