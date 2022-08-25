@@ -157,15 +157,17 @@ export class AFScreen
     {
         const [prediction, setPrediction] = React.useState('None');
         const [reject, setReject] = React.useState('None');
-        // const [detected, setDetected] = React.useState({ value: [1, 2]})
         const [, updateState] = React.useState({});
         const forceUpdate = React.useCallback(() => updateState({}), []);
-        const [post, setPost] = React.useState({ postId: 0 })
+
+        const [prog, setProg] = React.useState('Idle')
         
         useFocusEffect(forceUpdate);
 
         const checkPrediction = (value:any) =>
         {
+            setProg('Checking...');
+
             if(!value.prediction)
             {
                 setPrediction(JSON.stringify(value));
@@ -184,10 +186,24 @@ export class AFScreen
                 setReject('Reliable');
             else if (value.reject == 1)
                 setReject('Unreliable');
+
+            setProg('Success!');
+            setTimeout(() => {setProg('Idle')}, 1000);
         }
 
         const onClickDetect = async() =>
         {
+            if(File.value == 'None')
+            {
+                setProg('Please choose a file!');
+                setTimeout(() => {setProg('Idle')}, 1000);
+                return;
+            }
+
+            setPrediction('None');
+            setReject('None');
+
+            setProg('Reading sample...');
             const requestOptions = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -195,6 +211,7 @@ export class AFScreen
                 body: JSON.stringify({ value: await readFromSample() })
                 // body: JSON.stringify({ value: [1, 2, 3] })
             };
+            setProg('Predicting...');
             fetch("https://detect-af.azurewebsites.net/api/ecg-predict?code=serBnqELEn8-B03IlFAzEe8Q1Wy0RA_TAHoZTkB5caLNAzFuX6udzw==", requestOptions)
                 .then(response => response.json())
                 .then(data => checkPrediction(data));
@@ -222,6 +239,7 @@ export class AFScreen
                 <View style={styles.customContainer}>
                     {/* <Button title="Detect" onPress={onClickDetect}></Button> */}
                     <Button title="Detect" onPress={onClickDetect}></Button>
+                    <Text style={styles.sectionDescription}>Status: {prog}</Text>
                     <Text style={styles.sectionDescription}>Detected: {prediction}</Text>
                     <Text style={styles.sectionDescription}>Reject Status: {reject}</Text>
                     {/* <Text style={styles.sectionDescription}>PostID: {post.postId}</Text> */}
