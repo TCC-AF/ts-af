@@ -39,10 +39,10 @@ export default function HomeScreen({ navigation } : {navigation:any})
             <DataTable>
                 <DataTable.Header>
                     <DataTable.Title>Filename</DataTable.Title>
-                    <DataTable.Title>Expected</DataTable.Title>
+                    <DataTable.Title>Prediction</DataTable.Title>
                 </DataTable.Header>
                 <DataTable.Row>
-                    <DataTable.Cell>ecg.json</DataTable.Cell>
+                    <DataTable.Cell>sample.json</DataTable.Cell>
                     <DataTable.Cell>1</DataTable.Cell>
                 </DataTable.Row>
                 <DataTable.Row>
