@@ -180,9 +180,9 @@ export class AFScreen
                 case 4: setPrediction('Too Noisy'); break;
             }
 
-            if(value.prediction == 0)
+            if(value.reject == 0)
                 setReject('Reliable');
-            else if (value.prediction == 1)
+            else if (value.reject == 1)
                 setReject('Unreliable');
         }
 
