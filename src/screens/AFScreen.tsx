@@ -20,18 +20,7 @@ import { useFocusEffect} from '@react-navigation/native';
 
 const Stack = createNativeStackNavigator();
 const File = {value:'None'};
-
-// import file66 from '../assets/samples/0006-6.txt';
-// import file71 from '../assets/samples/0007-1.txt';
-// import file72 from '../assets/samples/0007-2.txt';
-// import file73 from '../assets/samples/0007-3.txt';
-// import file81 from '../assets/samples/0008-1.txt';
-// import file82 from '../assets/samples/0008-2.txt';
-// import file83 from '../assets/samples/0008-3.txt';
-// import file91 from '../assets/samples/0009-1.txt';
-// import file92 from '../assets/samples/0009-2.txt';
-// import file93 from '../assets/samples/0009-3.txt';
-// import fileecg from '../assets/samples/ecg.json';
+var FileFormat = 'json';
 
 export default function AFStackNavigation()
 {
@@ -64,7 +53,7 @@ async function getSampleText()
             method: 'GET',
             headers: { 'Content-Type': 'text/plain' },
         };
-    return fetch('https://raw.githubusercontent.com/ItsLame/ts-af/main/src/assets/samples/0006-6.txt?token=GHSAT0AAAAAABWIDSQWDYCOWAWWSTQQQWNKYYEZBPA', requestOptions)
+    return fetch('https://raw.githubusercontent.com/ItsLame/samples/main/readings/0006-6.txt', requestOptions)
         .then((response) => {
             return response.text().then(text => {
                 // console.log(text.split('\n').map(Number));
@@ -76,6 +65,44 @@ async function getSampleText()
         });
 }
 
+async function readFromSample()
+{
+    var fetchURL = 'https://raw.githubusercontent.com/ItsLame/samples/main/readings/' + File.value;
+
+    if(FileFormat == 'json')
+    {
+        return fetch(fetchURL)
+        .then((response) => response.json())
+        .then((responseJson) => {
+            return responseJson[3];
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+    }
+    else if(FileFormat == 'txt')
+    {
+        const requestOptions = {
+            method: 'GET',
+            headers: { 'Content-Type': 'text/plain' },
+        };
+        return fetch(fetchURL, requestOptions)
+        .then((response) => {
+            return response.text().then(text => {
+                // console.log(text.split('\n').map(Number));
+                return (text.split('\n').map(Number));
+            });
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+    }
+    else
+    {
+        File.value = 'Please Choose a File!';
+    }
+}
+
 export class AFScreen
 {
     constructor(){}
@@ -83,6 +110,7 @@ export class AFScreen
     SampleScreen()
     {
         const [value, setValue] = React.useState(File.value);
+        // const [fileFormat, setFileFormat] = React.useState(FileFormat);
 
         // const [, updateState] = React.useState({});
         // const forceUpdate = React.useCallback(() => updateState({}), []);
@@ -91,7 +119,9 @@ export class AFScreen
         {
             setValue(newValue);
             File.value = newValue;
-            // RunPrediction();
+            // setFileFormat(newValue.substr(newValue.indexOf('.')+1, 4));
+            FileFormat = newValue.substr(newValue.indexOf('.')+1, 4);
+            // console.log(newValue.substr(newValue.indexOf('.')+1, 4));
         }
 
         return (
@@ -105,7 +135,7 @@ export class AFScreen
                     <RadioButton.Group
                     onValueChange={(newValue) => onValueChangeHandler(newValue)}
                     value={value}>
-                        <RadioButton.Item label="ecg.json" value="ecg.json"/>
+                        <RadioButton.Item label="sample.json" value="sample.json"/>
                         <RadioButton.Item label="0006-6.txt" value="0006-6.txt"/>
                         <RadioButton.Item label="0007-1.txt" value="0007-1.txt"/>
                         <RadioButton.Item label="0007-2.txt" value="0007-2.txt"/>
@@ -192,7 +222,7 @@ export class AFScreen
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 // body: JSON.stringify({ value: await getSampleJson() })
-                body: JSON.stringify({ value: await getSampleText() })
+                body: JSON.stringify({ value: await readFromSample() })
                 // body: JSON.stringify({ value: [1, 2, 3] })
             };
             fetch("https://detect-af.azurewebsites.net/api/ecg-predict?code=serBnqELEn8-B03IlFAzEe8Q1Wy0RA_TAHoZTkB5caLNAzFuX6udzw==", requestOptions)
@@ -214,10 +244,10 @@ export class AFScreen
                     uses the tf.lite model to make a prediction.
                 </Text>
                 <View style={styles.customContainer}>
-                    {/* <Button title="Change File" onPress={onPressHandler}></Button> */}
-                    <Button title="Change File" onPress={readFile}></Button>
-                    {/* <Text style={styles.sectionDescription}>File: {File.value}</Text> */}
-                    <Text style={styles.sectionDescription}>File: {content}</Text>
+                    <Button title="Change File" onPress={onPressHandler}></Button>
+                    {/* <Button title="Change File" onPress={readFile}></Button> */}
+                    <Text style={styles.sectionDescription}>File: {File.value}</Text>
+                    {/* <Text style={styles.sectionDescription}>File: {content}</Text> */}
                 </View>
                 <View style={styles.customContainer}>
                     {/* <Button title="Detect" onPress={onClickDetect}></Button> */}
