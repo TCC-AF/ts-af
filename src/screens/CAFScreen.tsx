@@ -15,9 +15,12 @@ import {
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer, StackActions } from '@react-navigation/native';
+import { white } from 'react-native-paper/lib/typescript/styles/colors';
 
 const Stack = createNativeStackNavigator();
+const currFile = {value: 'None'};
 const File = {value:'None'};
+// const FileList = ['sample.json'];
 const FileList = ['sample.json', '0006-6.txt', '0007-1.txt', '0007-2.txt', '0007-3.txt',
                     '0008-1.txt', '0008-2.txt', '0008-3.txt', '0009-1.txt', '0009-2.txt', '0009-3.txt'];
 var FileFormat = 'json';
@@ -76,54 +79,30 @@ async function readFromSample()
     }
 }
 
-async function readSimulation()
-{
-    console.log('READ!');
-    var index = 0;
-    let emptyList: number[] = [];
-    let sampleList: number[] = [];
-
-    sampleList = await readFromSample();
-    setInterval(() => {
-        emptyList.push(index);
-        index++;
-    }
-    , 150);
-
-    console.log(emptyList.length);
-    console.log(sampleList.length);
-}
-
 export function CAFScreen({ navigation } : {navigation:any})
 {
+    var myTimer = 30;
     const [prediction, setPrediction] = React.useState('None');
     const [reject, setReject] = React.useState('None');
-    const [counter, setCounter] = React.useState(30);
+    const [counter, setCounter] = React.useState(myTimer);
     const [startCounter, setStartCounter] = React.useState(false);
 
     const [done, setDone] = React.useState(false);
     const [prog, setProg] = React.useState('Idle')
-
-    var index = 0;
+    const [index, setIndex] = React.useState(0);
 
     React.useEffect(() =>
     {
         if(startCounter)
         {
-            const timer = counter >= 0 && setInterval(() => setCounter(counter - 1), 500);
+            const timer = counter >= 0 && setInterval(() => setCounter(counter - 1), 1000);
 
-            if(!done)
+            if(counter < 0)
             {
-                // readSimulation();
-                setDone(true);
-            }
-            else if(counter < 0)
-            {
-                setProg('Reading...');
-                contDetect();
-                setDone(false);
-                setCounter(30);
                 readSimulation();
+                contDetect();
+                // setDone(false);
+                setCounter(myTimer);
             }
 
             return () => clearInterval(timer);
@@ -131,12 +110,110 @@ export function CAFScreen({ navigation } : {navigation:any})
     }
     ), [counter, startCounter]
 
+    const checkPrediction = (value:any) =>
+    {
+        setProg('Checking...');
+
+        if(!value.prediction)
+        {
+            setPrediction(JSON.stringify(value));
+            return;
+        }
+
+        switch(value.prediction)
+        {
+            case 1: setPrediction('Atrial Fibrillation'); break;
+            case 2: setPrediction('Normal Sinus Rhythm'); break;
+            case 3: setPrediction('Other Arrhytmia'); break;
+            case 4: setPrediction('Too Noisy'); break;
+        }
+
+        if(value.reject == 0)
+            setReject('Reliable');
+        else if (value.reject == 1)
+            setReject('Unreliable');
+
+        setDone(true);
+        setProg('Success!');
+        setTimeout(() => {setProg('Measuring...')}, 1000);
+    }
+
+    const onDetect = async(simulatedValue:number[]) =>
+    {
+        // console.log(simulatedValue.length);
+        // console.log(simulatedValue[0]);
+        // console.log(simulatedValue[1]);
+        setPrediction('None');
+        setReject('None');
+
+        setProg('Inputting data...');
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            // body: JSON.stringify({ value: await getSampleJson() })
+            body: JSON.stringify({ value: simulatedValue })
+            // body: JSON.stringify({ value: [1, 2, 3] })
+        };
+        setProg('Predicting...');
+        fetch("https://detect-af.azurewebsites.net/api/ecg-predict?code=serBnqELEn8-B03IlFAzEe8Q1Wy0RA_TAHoZTkB5caLNAzFuX6udzw==", requestOptions)
+            .then(response => response.json())
+            .then(data => checkPrediction(data));
+    }
+
+    const readSimulation = async() =>
+    {
+        var listIndex = 0;
+        let emptyList: number[] = [];
+        let sampleList: number[] = [];
+
+        sampleList = await readFromSample();
+        intervalSimulation(sampleList, emptyList, listIndex)
+    }
+
+    const intervalSimulation = (oldList:number[], newList:number[], listIndex:any) =>
+    {
+        setProg('Measuring...');
+
+        var interval = setInterval(() => {
+            newList.push(oldList[listIndex]);
+            listIndex++;
+
+            if(counter < 0)
+            {
+                setDone(true);
+                detectSimulation(oldList);
+                clearInterval(interval);
+            }
+        }
+        , 30);
+    }
+
+    const detectSimulation = async(newList:number[]) =>
+    {
+        setProg('Reading...');
+        await onDetect(newList);
+    }
+
     const contDetect = () =>
     {
-        setProg('Predicting...');
+        // console.log('index: ' + index);
+        // console.log('length: ' + FileList.length);
+
+        if(index > FileList.length-1)
+        {
+            // console.log('CHECKER');
+            setIndex(0);
+            // setIndex(index-1);
+            // setIndex(index-1);
+            // console.log('newindex: ' + index);
+        }
+
+        setIndex(0);
+        setProg('Setting file...');
         File.value = FileList[index];
+        // console.log(FileList[index]);
         FileFormat = FileList[index].substr(FileList[index].indexOf('.')+1, 4);
-        index++;
+        setIndex(index+1);
     }
 
     const onStartHandler = () =>
@@ -144,8 +221,10 @@ export function CAFScreen({ navigation } : {navigation:any})
         // navigation.navigate('Continuous AF ECG Sample List');
         setProg('Starting...');
         isStart = true;
+        contDetect();
         setStartCounter(true);
-        setTimeout(() => {setProg('Waiting for countdown...')}, 1000);
+        readSimulation();
+        // setTimeout(() => {setProg('Waiting for countdown...')}, 1000);
     }
 
     const onStopHandler = () =>
@@ -161,8 +240,10 @@ export function CAFScreen({ navigation } : {navigation:any})
         setProg('Reseting...');
         setStartCounter(false);
         isStart = false;
-        index = 0;
-        setCounter(30);
+        setIndex(0);
+        File.value = 'None';
+        FileFormat = FileList[index].substr(FileList[index].indexOf('.')+1, 4);
+        setCounter(myTimer);
         setTimeout(() => {setProg('Idle')}, 1000);
     }
 
@@ -174,7 +255,8 @@ export function CAFScreen({ navigation } : {navigation:any})
                 uses the tf.lite model (every 30 seconds) to make a prediction.
             </Text>
             <View style={styles.customContainer}>
-                <Text style={styles.sectionDescription}>Next File: {File.value}</Text>
+                <Text style={styles.sectionDescription}>Current File: {File.value}</Text>
+                <Text style={styles.sectionDescription}>Next File: {FileList[index]}</Text>
                 <View style={styles.customGrid22}>
                     <TouchableOpacity onPress={onStartHandler} style={styles.customButton1}>
                         <Text style={styles.customButtonText}>Start</Text>
