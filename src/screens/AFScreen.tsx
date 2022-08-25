@@ -206,10 +206,7 @@ export class AFScreen
                 case 3: setPrediction('Other Arrhytmia'); break;
                 case 4: setPrediction('Too Noisy'); break;
             }
-        }
 
-        const checkRejection = (value:any) =>
-        {
             if(value.prediction == 0)
                 setReject('Reliable');
             else if (value.prediction == 1)
@@ -253,6 +250,7 @@ export class AFScreen
                     {/* <Button title="Detect" onPress={onClickDetect}></Button> */}
                     <Button title="Detect" onPress={onClickDetect}></Button>
                     <Text style={styles.sectionDescription}>Detected: {prediction}</Text>
+                    <Text style={styles.sectionDescription}>Reject Status: {reject}</Text>
                     {/* <Text style={styles.sectionDescription}>PostID: {post.postId}</Text> */}
                 </View>
             </View>
