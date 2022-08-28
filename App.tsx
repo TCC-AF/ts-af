@@ -15,36 +15,36 @@ const Tab = createBottomTabNavigator();
 
 function App()
 {
-  const myIcon = <FontAwesome5 name="rocket" size={30} color="#900" />;
-
   return (
     <NavigationContainer>
       <Tab.Navigator screenOptions={({ route }) => ({
         header: () => null,
-        // tabBarIcon: ({ focused, size }) => {
-        //   let iconName='';
-        //   if (route.name==="Home")
-        //   {
-        //       iconName = 'house-chimney';
-        //       size = focused ? 25 : 20;
-        //   }
-        //   else if (route.name==="AF Screen")
-        //   {
-        //     iconName = 'wave-pulse';
-        //     size = focused ? 25 : 20;
-        //   }
-        //   else if (route.name==="Continuous AF Screen")
-        //   {
-        //     iconName = 'heart-pulse';
-        //     size = focused ? 25 : 20;
-        //   }
-        //   return (
-        //     <FontAwesome5
-        //       name={iconName}
-        //       size={size}
-        //     />
-        //   )
-        // }
+        tabBarIcon: ({ focused, size }) => {
+          let iconName='';
+          if (route.name==="Home")
+          {
+              iconName = 'home';
+              size = focused ? 25 : 20;
+          }
+          else if (route.name==="AF Screen")
+          {
+            iconName = 'heart';
+            size = focused ? 25 : 20;
+          }
+          else if (route.name==="Continuous AF Screen")
+          {
+            iconName = 'heartbeat';
+            size = focused ? 25 : 20;
+          }
+          return (
+            <FontAwesome5
+              name={iconName}
+              size={size}
+            />
+            // <FontAwesomeIcon icon="iconName" />
+            // <FontAwesomeIcon icon="heart-pulse" />
+          )
+        }
       })}
       // screenOptions=
       // {{

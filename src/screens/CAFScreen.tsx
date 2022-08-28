@@ -1,5 +1,4 @@
 import React, {type PropsWithChildren} from 'react';
-import DropDownPicker from 'react-native-dropdown-picker';
 import styles from '../components/CustomStyle';
 
 import {
@@ -101,7 +100,6 @@ export function CAFScreen({ navigation } : {navigation:any})
             {
                 readSimulation();
                 contDetect();
-                // setDone(false);
                 setCounter(myTimer);
             }
 
@@ -143,6 +141,10 @@ export function CAFScreen({ navigation } : {navigation:any})
         // console.log(simulatedValue.length);
         // console.log(simulatedValue[0]);
         // console.log(simulatedValue[1]);
+
+        // body: JSON.stringify({ value: await getSampleJson() })
+        // body: JSON.stringify({ value: [1, 2, 3] })
+        
         setPrediction('None');
         setReject('None');
 
@@ -150,9 +152,7 @@ export function CAFScreen({ navigation } : {navigation:any})
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            // body: JSON.stringify({ value: await getSampleJson() })
             body: JSON.stringify({ value: simulatedValue })
-            // body: JSON.stringify({ value: [1, 2, 3] })
         };
         setProg('Predicting...');
         fetch("https://detect-af.azurewebsites.net/api/ecg-predict?code=serBnqELEn8-B03IlFAzEe8Q1Wy0RA_TAHoZTkB5caLNAzFuX6udzw==", requestOptions)
@@ -180,7 +180,6 @@ export function CAFScreen({ navigation } : {navigation:any})
 
             if(counter < 0)
             {
-                setDone(true);
                 detectSimulation(oldList);
                 clearInterval(interval);
             }
@@ -243,6 +242,8 @@ export function CAFScreen({ navigation } : {navigation:any})
         setIndex(0);
         File.value = 'None';
         FileFormat = FileList[index].substr(FileList[index].indexOf('.')+1, 4);
+        setPrediction('None');
+        setReject('None');
         setCounter(myTimer);
         setTimeout(() => {setProg('Idle')}, 1000);
     }

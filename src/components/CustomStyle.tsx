@@ -1,7 +1,6 @@
 import {
     StyleSheet,
 } from 'react-native';
-import { blue100 } from 'react-native-paper/lib/typescript/styles/colors';
 
 // const styles = StyleSheet.create
 export default StyleSheet.create
