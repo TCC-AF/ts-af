@@ -4,9 +4,10 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import HomeScreen from './src/screens/HomeScreen';
 import AFScreen from './src/screens/AFScreen';
-import AFStackNavigation from './src/screens/AFScreen';
+// import AFStackNavigation from './src/screens/AFScreen';
 import CAFScreen from './src/screens/CAFScreen';
-import CAFStackNavigation, { CAFSampleScreen } from './src/screens/CAFScreen';
+// import CAFStackNavigation, { CAFSampleScreen } from './src/screens/CAFScreen';
+import TFJSScreen from './src/screens/TFJSScreen';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -53,8 +54,9 @@ function App()
       // }}
       >
         <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="AF Screen" component={AFStackNavigation} options={{headerShown: false}}/>
-        <Tab.Screen name="Continuous AF Screen" component={CAFStackNavigation} options={{headerShown: false}}/>
+        <Tab.Screen name="AF Screen" component={AFScreen} options={{headerShown: false}}/>
+        <Tab.Screen name="Continuous AF Screen" component={CAFScreen} options={{headerShown: false}}/>
+        <Tab.Screen name="TFJS" component={TFJSScreen} options={{headerShown: false}}/>
       </Tab.Navigator>
     </NavigationContainer>
   );
