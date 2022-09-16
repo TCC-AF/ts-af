@@ -19,6 +19,7 @@
     "@react-navigation/native-stack": "^6.7.0",
     "@tensorflow/tfjs": "^3.20.0",
     "@tensorflow/tfjs-react-native": "^0.8.0",
+    "@tensorflow/tfjs-tflite": "^0.0.1-alpha.8",
     "@types/react-native-vector-icons": "^6.4.11",
     "async-storage": "^0.1.0",
     "document": "^0.4.7",

@@ -4,9 +4,7 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 import HomeScreen from './src/screens/HomeScreen';
 import AFScreen from './src/screens/AFScreen';
-// import AFStackNavigation from './src/screens/AFScreen';
 import CAFScreen from './src/screens/CAFScreen';
-// import CAFStackNavigation, { CAFSampleScreen } from './src/screens/CAFScreen';
 import TFJSScreen from './src/screens/TFJSScreen';
 
 import { NavigationContainer } from '@react-navigation/native';
@@ -21,20 +19,25 @@ function App()
       <Tab.Navigator screenOptions={({ route }) => ({
         header: () => null,
         tabBarIcon: ({ focused, size }) => {
-          let iconName='';
+          let iconName='home';
           if (route.name==="Home")
           {
-              iconName = 'home';
+              // iconName = 'home';
               size = focused ? 25 : 20;
           }
-          else if (route.name==="AF Screen")
+          else if (route.name==="AF")
           {
             iconName = 'heart';
             size = focused ? 25 : 20;
           }
-          else if (route.name==="Continuous AF Screen")
+          else if (route.name==="CAF")
           {
             iconName = 'heartbeat';
+            size = focused ? 25 : 20;
+          }
+          else if (route.name==="TFJS")
+          {
+            iconName = 'hat-wizard';
             size = focused ? 25 : 20;
           }
           return (
@@ -54,8 +57,8 @@ function App()
       // }}
       >
         <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="AF Screen" component={AFScreen} options={{headerShown: false}}/>
-        <Tab.Screen name="Continuous AF Screen" component={CAFScreen} options={{headerShown: false}}/>
+        <Tab.Screen name="AF" component={AFScreen} options={{headerShown: false}}/>
+        <Tab.Screen name="CAF" component={CAFScreen} options={{headerShown: false}}/>
         <Tab.Screen name="TFJS" component={TFJSScreen} options={{headerShown: false}}/>
       </Tab.Navigator>
     </NavigationContainer>

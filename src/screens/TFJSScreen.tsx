@@ -27,12 +27,13 @@ var isStart = false;
 
 import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-react-native';
+// import * as tflite from '@tensorflow/tfjs-tflite';
 
 export default function CAFStackNavigation()
 {
     return (
         <Stack.Navigator>
-            <Stack.Screen name="TFJS Test" component={TFJSScreen} />
+            <Stack.Screen name="TFJS Screen" component={TFJSScreen} />
             {/* <Stack.Screen name="Continuous AF ECG Sample List" component={CAFSampleScreen} /> */}
         </Stack.Navigator>
     )
@@ -241,6 +242,13 @@ export function TFJSScreen({ navigation } : {navigation:any})
         console.log('TFJS Ready');
     }
 
+    // const onTFLiteHandler = async() =>
+    // {
+    //     // const custom_model = await tflite.loadTFLiteModel('https://tccafb9f2.file.core.windows.net/af-detectb625/site/wwwroot/af-predict/model_custom.tflite');
+    //     console.log('TFLite Loaded');
+    //     // console.log(custom_model);
+    // }
+
     return (
     <ScrollView>
         <View style={styles.sectionContainer}>
@@ -252,6 +260,9 @@ export function TFJSScreen({ navigation } : {navigation:any})
                 <TouchableOpacity onPress={onTFJSReadyHandler} style={styles.customButton1}>
                     <Text style={styles.customButtonText}>Check TFJS Ready</Text>
                 </TouchableOpacity>
+                {/* <TouchableOpacity onPress={onTFLiteHandler} style={styles.customButton1}>
+                    <Text style={styles.customButtonText}>Check TFLite Ready</Text>
+                </TouchableOpacity> */}
                 <Text style={styles.sectionDescription}>Current File: {File.value}</Text>
                 <Text style={styles.sectionDescription}>Next File: {FileList[index]}</Text>
                 <View style={styles.customGrid22}>
