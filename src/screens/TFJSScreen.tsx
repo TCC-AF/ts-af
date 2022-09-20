@@ -17,17 +17,27 @@ import { NavigationContainer, StackActions } from '@react-navigation/native';
 import { white } from 'react-native-paper/lib/typescript/styles/colors';
 
 const Stack = createNativeStackNavigator();
-const currFile = {value: 'None'};
-const File = {value:'None'};
+// const File = {value:'None'};
+const File = {value:'sample'};
 // const FileList = ['sample.json'];
 const FileList = ['sample.json', '0006-6.txt', '0007-1.txt', '0007-2.txt', '0007-3.txt',
                     '0008-1.txt', '0008-2.txt', '0008-3.txt', '0009-1.txt', '0009-2.txt', '0009-3.txt'];
-var FileFormat = 'json';
+var FileFormat = 'txt';
 var isStart = false;
 
 import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-react-native';
+import { print } from '@tensorflow/tfjs';
 // import * as tflite from '@tensorflow/tfjs-tflite';
+
+import RNFS from 'react-native-fs';
+import { bundleResourceIO } from '@tensorflow/tfjs-react-native';
+
+// const modelJson = require('../assets/af/layers-model/model.json');
+// const modelWeights = require('../assets/af/layers-model/group1-shard1of34.bin');
+// const modelWeights = require('../assets/af/graph-model/group1-shard1of33.bin');
+const modelJson = require('../assets/af/graph-model/model.json');
+const modelWeights = require('../assets/af/graph-model/weights.bin');
 
 export default function CAFStackNavigation()
 {
@@ -50,7 +60,9 @@ export default function CAFStackNavigation()
 
 async function readFromSample()
 {
-    var fetchURL = 'https://raw.githubusercontent.com/ItsLame/samples/main/readings/' + File.value;
+    // var fetchURL = 'https://raw.githubusercontent.com/ItsLame/samples/main/readings/' + File.value;
+    // var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/' + File.value;
+    var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/sample06-6.txt';
 
     if(FileFormat == 'json')
     {
@@ -240,14 +252,44 @@ export function TFJSScreen({ navigation } : {navigation:any})
         // Wait for tf to be ready.
         await tf.ready();
         console.log('TFJS Ready');
-    }
 
-    // const onTFLiteHandler = async() =>
-    // {
-    //     // const custom_model = await tflite.loadTFLiteModel('https://tccafb9f2.file.core.windows.net/af-detectb625/site/wwwroot/af-predict/model_custom.tflite');
-    //     console.log('TFLite Loaded');
-    //     // console.log(custom_model);
-    // }
+        try {
+            // load model
+            let model = await tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights));
+
+            // read from sample
+            let sample = await readFromSample();
+            // console.log(sample);
+            let sampleData = tf.tensor1d(sample);
+            // console.log(sampleData);
+
+            // let newData = sampleData.reshape([-1, 3000, 1]);
+            // let newData = sampleData.reshape([1, 3000]);
+            let newData = sampleData.reshape([-1, 3000, 1]);
+            // sampleData.reshape([-1, 3000, 1]).print();
+            // sampleData.reshape([1, 3000]).print();
+            // sampleData.reshape([3000, 1]).print();
+
+            // console.log(newData)
+            // let newData = sampleData.reshape([1, 7500]);
+            // let newData = sampleData.reshape([2, 3750]);
+            // let newData = sampleData.reshape([1, 3000])
+            // let newData = sampleData.reshape([1, 3001]);
+            // console.log(sampleData);
+            // console.log(newdata);
+
+            // make prediction based from sample array
+            // const res = model.predict(newData) as tf.Tensor;
+            // const res = model.predict(newData) as tf.Tensor;
+            // console.log(res)
+
+        } catch(e) {
+            // console.log("the model could not be loaded")
+            console.log(e)
+        } finally {
+            console.log("Done")
+        }
+    }
 
     return (
     <ScrollView>
@@ -285,3 +327,32 @@ export function TFJSScreen({ navigation } : {navigation:any})
     </ScrollView>
     );
 }
+
+
+
+
+
+
+
+// ARCHIVE
+// const fileName = `${RNFS.DocumentDirectoryPath}/AF/layers-model/model.json`;
+// const fileName = `${RNFS.DocumentDirectoryPath}/model.json`;
+// const fileName = `${RNFS.DocumentDirectoryPath}/Test`;
+// const exists = await RNFS.exists(fileName);
+
+// const direxists = await RNFS.exists(RNFS.DocumentDirectoryPath);
+// const direxists = await RNFS.exists(`${RNFS.DocumentDirectoryPath}`);
+
+// const path = await require('../assets/af/layers-model/group1-shard1of34.bin');
+// const binpath = require('./group1-shard1of34.bin');
+// const path = require('../assets/af/layers-model/model.json');
+// console.log(path);
+// console.log(exists);
+// console.log(direxists);
+// console.log(RNFS.DocumentDirectoryPath);
+// console.log(direxists);
+
+//source: https://stackoverflow.com/questions/70995689/importing-bin-file-in-expo
+// const modelJson = require('../assets/af/layers-model/model.json');
+// const modelWeights = require('../assets/af/layers-model/group1-shard1of34.bin');
+// let model = await tf.loadLayersModel(bundleResourceIO(modelJson, modelWeights));

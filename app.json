@@ -1,4 +1,7 @@
 {
   "name": "ts",
-  "displayName": "ts"
+  "displayName": "ts",
+  "packagerOpts": {
+    "config": "metro.config.js"
+  }
 }

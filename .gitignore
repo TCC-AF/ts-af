@@ -63,3 +63,5 @@ buck-out/
 /vendor/bundle/
 src/modules/af/model_custom.tflite
 *.tflite
+*.bin
+model.json
