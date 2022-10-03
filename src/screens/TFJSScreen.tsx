@@ -259,13 +259,35 @@ export function TFJSScreen({ navigation } : {navigation:any})
 
             // read from sample
             let sample = await readFromSample();
+
+            let tempF = tf.squeeze(sample);
+            // let tempN = 
+            // let tempNRF = tf.expandDims(tempF, 1)
+
+            // let input_details = tf.input(tempNRF);
+
+            // const res = model.predict(tempNRF);
+            // const res = model.predict(input_details) as tf.Tensor;
+            // console.log(res)
+
+            // console.log(input_details);
+
             // console.log(sample);
-            let sampleData = tf.tensor1d(sample);
+            // let sampleData = tf.tensor1d(sample);
             // console.log(sampleData);
 
             // let newData = sampleData.reshape([-1, 3000, 1]);
             // let newData = sampleData.reshape([1, 3000]);
-            let newData = sampleData.reshape([-1, 3000, 1]);
+            // let newData = sampleData.reshape([-1, 3000, 1]);
+            // console.log(newData);
+
+            // let newArray = []
+            // for (var a in newData) {
+                // newArray.push(a);
+            // }
+
+            // console.log(newData);
+
             // sampleData.reshape([-1, 3000, 1]).print();
             // sampleData.reshape([1, 3000]).print();
             // sampleData.reshape([3000, 1]).print();
