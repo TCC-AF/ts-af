@@ -1,4 +1,4 @@
-import React, {type PropsWithChildren} from 'react';
+import React, { type PropsWithChildren } from 'react';
 import styles from '../components/CustomStyle';
 
 import {
@@ -18,17 +18,19 @@ import { white } from 'react-native-paper/lib/typescript/styles/colors';
 
 const Stack = createNativeStackNavigator();
 // const File = {value:'None'};
-const File = {value:'sample'};
+const File = { value: 'sample06-6' };
 // const FileList = ['sample.json'];
-const FileList = ['sample.json', '0006-6.txt', '0007-1.txt', '0007-2.txt', '0007-3.txt',
-                    '0008-1.txt', '0008-2.txt', '0008-3.txt', '0009-1.txt', '0009-2.txt', '0009-3.txt'];
-var FileFormat = 'txt';
+// const FileList = ['sample.json', '0006-6.txt', '0007-1.txt', '0007-2.txt', '0007-3.txt',
+    // '0008-1.txt', '0008-2.txt', '0008-3.txt', '0009-1.txt', '0009-2.txt', '0009-3.txt'];
+
+const FileList = ['p_sample.json', 'p_0006-6.txt', 'p_0007-1.txt', 'p_0007-2.txt', 'p_0007-3.txt',
+    'p_0008-1.txt', 'p_0008-2.txt', 'p_0008-3.txt', 'p_0009-1.txt', 'p_0009-2.txt', 'p_0009-3.txt'];
+
+var FileFormat = 'json';
 var isStart = false;
 
 import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-react-native';
-import { print } from '@tensorflow/tfjs';
-// import * as tflite from '@tensorflow/tfjs-tflite';
 
 import RNFS from 'react-native-fs';
 import { bundleResourceIO } from '@tensorflow/tfjs-react-native';
@@ -36,11 +38,15 @@ import { bundleResourceIO } from '@tensorflow/tfjs-react-native';
 // const modelJson = require('../assets/af/layers-model/model.json');
 // const modelWeights = require('../assets/af/layers-model/group1-shard1of34.bin');
 // const modelWeights = require('../assets/af/graph-model/group1-shard1of33.bin');
+
+// const modelJson = require('../assets/af/layers-model/model.json');
 const modelJson = require('../assets/af/graph-model/model.json');
+// const modelWeights = require('../assets/af/layers-model/weights.bin');
 const modelWeights = require('../assets/af/graph-model/weights.bin');
 
-export default function CAFStackNavigation()
-{
+const p_ecg = require('../assets/samples/processed/p_sample.json');
+
+export default function TFJSStackNavigation() {
     return (
         <Stack.Navigator>
             <Stack.Screen name="TFJS Screen" component={TFJSScreen} />
@@ -49,53 +55,47 @@ export default function CAFStackNavigation()
     )
 }
 
-// export function CAFSampleScreen({ navigation } : {navigation:any})
-// {
-//     return (
-//         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-//             <Text>AF Screen</Text>
-//         </View>
-//     )
-// }
-
-async function readFromSample()
-{
+async function readFromSample() {
     // var fetchURL = 'https://raw.githubusercontent.com/ItsLame/samples/main/readings/' + File.value;
     // var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/' + File.value;
-    var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/sample06-6.txt';
+    // var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/sample06-6.txt';
+    // var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/0006-6.txt';
 
-    if(FileFormat == 'json')
-    {
-        return fetch(fetchURL)
-        .then((response) => response.json())
-        .then((responseJson) => {
-            return responseJson[3];
-        })
-        .catch((error) => {
-            console.error(error);
-        });
+    var fetchURL = FileList[0];
+
+    // if (FileFormat == 'json') {
+    if (fetchURL.split('.')[1] == 'json') {
+        let sample_data = JSON.stringify(fetchURL);
+        console.log(sample_data)
+        return sample_data; 
+        // return fetch(fetchURL)
+        //     .then((response) => response.json())
+        //     .then((responseJson) => {
+        //         return responseJson[3];
+        //     })
+        //     .catch((error) => {
+        //         console.error(error);
+        //     });
     }
-    else if(FileFormat == 'txt')
-    {
+    else if (fetchURL.split('.')[1] == 'txt') {
         const requestOptions = {
             method: 'GET',
             headers: { 'Content-Type': 'text/plain' },
         };
         return fetch(fetchURL, requestOptions)
-        .then((response) => {
-            return response.text().then(text => {
-                // console.log(text.split('\n').map(Number));
-                return (text.split('\n').map(Number));
+            .then((response) => {
+                return response.text().then(text => {
+                    // console.log(text.split('\n').map(Number));
+                    return (text.split('\n').map(Number));
+                });
+            })
+            .catch((error) => {
+                console.error(error);
             });
-        })
-        .catch((error) => {
-            console.error(error);
-        });
     }
 }
 
-export function TFJSScreen({ navigation } : {navigation:any})
-{
+export function TFJSScreen({ navigation }: { navigation: any }) {
     var myTimer = 30;
     const [prediction, setPrediction] = React.useState('None');
     const [reject, setReject] = React.useState('None');
@@ -106,14 +106,11 @@ export function TFJSScreen({ navigation } : {navigation:any})
     const [prog, setProg] = React.useState('Idle')
     const [index, setIndex] = React.useState(0);
 
-    React.useEffect(() =>
-    {
-        if(startCounter)
-        {
+    React.useEffect(() => {
+        if (startCounter) {
             const timer = counter >= 0 && setInterval(() => setCounter(counter - 1), 1000);
 
-            if(counter < 0)
-            {
+            if (counter < 0) {
                 readSimulation();
                 contDetect();
                 setCounter(myTimer);
@@ -124,36 +121,11 @@ export function TFJSScreen({ navigation } : {navigation:any})
     }
     ), [counter, startCounter]
 
-    const checkPrediction = (value:any) =>
-    {
-        setProg('Checking...');
+    // ---------------------------------- //
+    // ------ AF Detection (Azure) ------ //
+    // ---------------------------------- //
 
-        if(!value.prediction)
-        {
-            setPrediction(JSON.stringify(value));
-            return;
-        }
-
-        switch(value.prediction)
-        {
-            case 1: setPrediction('Atrial Fibrillation'); break;
-            case 2: setPrediction('Normal Sinus Rhythm'); break;
-            case 3: setPrediction('Other Arrhytmia'); break;
-            case 4: setPrediction('Too Noisy'); break;
-        }
-
-        if(value.reject == 0)
-            setReject('Reliable');
-        else if (value.reject == 1)
-            setReject('Unreliable');
-
-        setDone(true);
-        setProg('Success!');
-        setTimeout(() => {setProg('Measuring...')}, 1000);
-    }
-
-    const onDetect = async(simulatedValue:number[]) =>
-    {   
+    const onDetect = async (simulatedValue: number[]) => {
         setPrediction('None');
         setReject('None');
 
@@ -169,89 +141,89 @@ export function TFJSScreen({ navigation } : {navigation:any})
             .then(data => checkPrediction(data));
     }
 
-    const readSimulation = async() =>
-    {
-        var listIndex = 0;
-        let emptyList: number[] = [];
-        let sampleList: number[] = [];
+    const checkPrediction = (value: any) => {
+        setProg('Checking...');
 
-        sampleList = await readFromSample();
-        intervalSimulation(sampleList, emptyList, listIndex)
-    }
-
-    const intervalSimulation = (oldList:number[], newList:number[], listIndex:any) =>
-    {
-        setProg('Measuring...');
-
-        var interval = setInterval(() => {
-            newList.push(oldList[listIndex]);
-            listIndex++;
-
-            if(counter < 0)
-            {
-                detectSimulation(oldList);
-                clearInterval(interval);
-            }
-        }
-        , 30);
-    }
-
-    const detectSimulation = async(newList:number[]) =>
-    {
-        setProg('Reading...');
-        await onDetect(newList);
-    }
-
-    const contDetect = () =>
-    {
-        if(index > FileList.length-1)
-        {
-            setIndex(0);
+        if (!value.prediction) {
+            setPrediction(JSON.stringify(value));
+            return;
         }
 
-        setIndex(0);
-        setProg('Setting file...');
-        File.value = FileList[index];
-        FileFormat = FileList[index].substr(FileList[index].indexOf('.')+1, 4);
-        setIndex(index+1);
+        switch (value.prediction) {
+            case 1: setPrediction('Atrial Fibrillation'); break;
+            case 2: setPrediction('Normal Sinus Rhythm'); break;
+            case 3: setPrediction('Other Arrhytmia'); break;
+            case 4: setPrediction('Too Noisy'); break;
+        }
+
+        if (value.reject == 0)
+            setReject('Reliable');
+        else if (value.reject == 1)
+            setReject('Unreliable');
+
+        setDone(true);
+        setProg('Success!');
+        setTimeout(() => { setProg('Measuring...') }, 1000);
     }
 
-    const onStartHandler = () =>
-    {
-        setProg('Starting...');
-        isStart = true;
-        contDetect();
-        setStartCounter(true);
-        readSimulation();
+    // --------------------------------- //
+    // ------ AF Detection (TFJS) ------ //
+    // --------------------------------- //
+
+    const secondLargest = (prediction_array: number[]) => {
+        let sortedArray = tf.squeeze(prediction_array.sort().reverse()).arraySync() as number[];
+        let secondLargestNumber = sortedArray[1];
+        
+        return secondLargestNumber;
     }
 
-    const onStopHandler = () =>
-    {
-        setProg('Stopping...');
-        setStartCounter(false);
-        isStart = false;
-        setTimeout(() => {setProg('Idle')}, 1000);
-    }
+    const onTFJSReadyHandler = async () => {
 
-    const onResetHandler = () =>
-    {
-        setProg('Reseting...');
-        setStartCounter(false);
-        isStart = false;
-        setIndex(0);
-        File.value = 'None';
-        FileFormat = FileList[index].substr(FileList[index].indexOf('.')+1, 4);
-        setPrediction('None');
-        setReject('None');
-        setCounter(myTimer);
-        setTimeout(() => {setProg('Idle')}, 1000);
-    }
+        // If crash after predict, add the following line
+        await tf.setBackend('cpu');
 
-    const onTFJSReadyHandler = async() =>
-    {
         // Wait for tf to be ready.
         await tf.ready();
         console.log('TFJS Ready');
+
+        // The minimum prediction confidence.
+        // const threshold = 0.9;
+
+        // Load the model. Users optionally pass in a threshold and an array of
+        // labels to include.
+        // toxicity.load(threshold).then(model => {
+            // const sentences = ['you suck'];
+
+            // model.classify(sentences).then(predictions => {
+                // `predictions` is an array of objects, one for each prediction head,
+                // that contains the raw probabilities for each input along with the
+                // final prediction in `match` (either `true` or `false`).
+                // If neither prediction exceeds the threshold, `match` is `null`.
+
+                // console.log(predictions);
+                /*
+                prints:
+                {
+                "label": "identity_attack",
+                "results": [{
+                    "probabilities": [0.9659664034843445, 0.03403361141681671],
+                    "match": false
+                }]
+                },
+                {
+                "label": "insult",
+                "results": [{
+                    "probabilities": [0.08124706149101257, 0.9187529683113098],
+                    "match": true
+                }]
+                },
+                ...
+                */
+            // });
+        // });
+
+        // return;
+
 
         try {
             // load model
@@ -260,7 +232,61 @@ export function TFJSScreen({ navigation } : {navigation:any})
             // read from sample
             let sample = await readFromSample();
 
-            let tempF = tf.squeeze(sample);
+            // expand to match input
+            let sample_expand = tf.expandDims(tf.expandDims(sample, 1), 0);
+
+            // predict model
+            let res = model.predict(sample_expand) as tf.Tensor;
+
+            console.log("check predict pass")
+            // console.log(res)
+            // console.log("respond ok")
+
+            // print results
+            // res.print();
+
+            console.log(res.as1D().toString())
+
+            checkTFJSResult(res.as1D())
+            // console.log(res.array())
+            // console.log(res.toFloat())
+
+            // load model
+            // let model = await tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights));
+            // let model = await tf.loadLayersModel(bundleResourceIO(modelJson, modelWeights));
+
+            // read from sample
+            // let sample = await readFromSample();
+            // let sample_expand = tf.expandDims(tf.expandDims(sample, 1), 0);
+
+            // console.log(sample_expand)
+
+            // console.log(typeof(sample_expand))
+            // console.log(model.outputs)
+
+            // let tempNRR = tf.tensor(sample)
+            // let transSample = tf.expandDims(tf.tensor(sample), 0);
+            // console.log(transSample)
+            // let res = model.predict(sample_expand) as tf.Tensor;
+            // let res = await model.predict(sample_expand);
+            // console.log("check predict pass")
+            // console.log(res)
+            // console.log("respond ok")
+            // console.log("printing")
+            // res.print();
+
+            // console.log(model.inputs);
+            // console.log(model.outputs);
+
+            // console.log(model.outputNodes);
+            // model
+
+            // console.log(sample_expand);
+            // console.log(sample);
+            // let prediction = tf.argMax(model.predict(sample_expand));
+            // let res = model.predict(sample);
+
+            // let tempF = tf.squeeze(sample);
             // let tempN = 
             // let tempNRF = tf.expandDims(tempF, 1)
 
@@ -273,8 +299,12 @@ export function TFJSScreen({ navigation } : {navigation:any})
             // console.log(input_details);
 
             // console.log(sample);
-            // let sampleData = tf.tensor1d(sample);
+            // let sampleData = tf.tensor(sample);
+            // model.in
             // console.log(sampleData);
+
+            // let sampleExpand = tf.expandDims(tf.expandDims(sampleData, 1), 0);
+            // console.log(sampleExpand)
 
             // let newData = sampleData.reshape([-1, 3000, 1]);
             // let newData = sampleData.reshape([1, 3000]);
@@ -283,7 +313,7 @@ export function TFJSScreen({ navigation } : {navigation:any})
 
             // let newArray = []
             // for (var a in newData) {
-                // newArray.push(a);
+            // newArray.push(a);
             // }
 
             // console.log(newData);
@@ -301,11 +331,11 @@ export function TFJSScreen({ navigation } : {navigation:any})
             // console.log(newdata);
 
             // make prediction based from sample array
-            // const res = model.predict(newData) as tf.Tensor;
+            // const res = model.predict(sampleData) as tf.Tensor;
             // const res = model.predict(newData) as tf.Tensor;
             // console.log(res)
 
-        } catch(e) {
+        } catch (e) {
             // console.log("the model could not be loaded")
             console.log(e)
         } finally {
@@ -313,40 +343,148 @@ export function TFJSScreen({ navigation } : {navigation:any})
         }
     }
 
+    const checkTFJSResult = (output_data: any) => {
+        let prediction = tf.argMax(output_data).arraySync() as number + 1;
+        let predictionProb = output_data.arraySync() as number[];
+        let thresh = [0.95, 0.91]
+        console.log(prediction);
+        console.log(tf.max(predictionProb).arraySync());
+        secondLargest(predictionProb);
+        if (tf.max(predictionProb).arraySync() < thresh[0] &&
+            (tf.max(predictionProb).arraySync() as number)-secondLargest(predictionProb) < thresh[1])
+            var reject = 1
+        else
+            reject = 0
+    
+            switch (prediction) {
+                case 1: setPrediction('Atrial Fibrillation'); break;
+                case 2: setPrediction('Normal Sinus Rhythm'); break;
+                case 3: setPrediction('Other Arrhytmia'); break;
+                case 4: setPrediction('Too Noisy'); break;
+            }
+    
+            if (reject == 0)
+                setReject('Reliable');
+            else if (reject == 1)
+                setReject('Unreliable');
+    
+            setDone(true);
+            setProg('Success!');
+            setTimeout(() => { setProg('Measuring...') }, 1000);
+    }
+
+    // ----------------------------------- //
+    // ------ Continuous Simulation ------ //
+    // ----------------------------------- //
+
+    const readSimulation = async () => {
+        var listIndex = 0;
+        let emptyList: number[] = [];
+        let sampleList: number[] = [];
+
+        sampleList = await readFromSample();
+        intervalSimulation(sampleList, emptyList, listIndex)
+    }
+
+    const intervalSimulation = (oldList: number[], newList: number[], listIndex: any) => {
+        setProg('Measuring...');
+
+        var interval = setInterval(() => {
+            newList.push(oldList[listIndex]);
+            listIndex++;
+
+            if (counter < 0) {
+                detectSimulation(oldList);
+                clearInterval(interval);
+            }
+        }
+            , 30);
+    }
+
+    const detectSimulation = async (newList: number[]) => {
+        setProg('Reading...');
+        await onDetect(newList);
+    }
+
+    const contDetect = () => {
+        if (index > FileList.length - 1) {
+            setIndex(0);
+        }
+
+        setIndex(0);
+        setProg('Setting file...');
+        File.value = FileList[index];
+        FileFormat = FileList[index].substr(FileList[index].indexOf('.') + 1, 4);
+        setIndex(index + 1);
+    }
+
+    // ------------------------------ //
+    // ------ Controls/Buttons ------ //
+    // ------------------------------ //
+
+    const onStartHandler = () => {
+        setProg('Starting...');
+        isStart = true;
+        contDetect();
+        setStartCounter(true);
+        readSimulation();
+    }
+
+    const onStopHandler = () => {
+        setProg('Stopping...');
+        setStartCounter(false);
+        isStart = false;
+        setTimeout(() => { setProg('Idle') }, 1000);
+    }
+
+    const onResetHandler = () => {
+        setProg('Reseting...');
+        setStartCounter(false);
+        isStart = false;
+        setIndex(0);
+        File.value = 'None';
+        FileFormat = FileList[index].substr(FileList[index].indexOf('.') + 1, 4);
+        setPrediction('None');
+        setReject('None');
+        setCounter(myTimer);
+        setTimeout(() => { setProg('Idle') }, 1000);
+    }
+
     return (
-    <ScrollView>
-        <View style={styles.sectionContainer}>
-            <Text style={styles.sectionDescription}>
-                Takes in a continuous ECG measurement output file and 
-                uses the tf.lite model (every 30 seconds) to make a prediction.
-            </Text>
-            <View style={styles.customContainer}>
-                <TouchableOpacity onPress={onTFJSReadyHandler} style={styles.customButton1}>
-                    <Text style={styles.customButtonText}>Check TFJS Ready</Text>
-                </TouchableOpacity>
-                {/* <TouchableOpacity onPress={onTFLiteHandler} style={styles.customButton1}>
+        <ScrollView>
+            <View style={styles.sectionContainer}>
+                <Text style={styles.sectionDescription}>
+                    Takes in a continuous ECG measurement output file and
+                    uses the tf.lite model (every 30 seconds) to make a prediction.
+                </Text>
+                <View style={styles.customContainer}>
+                    <TouchableOpacity onPress={onTFJSReadyHandler} style={styles.customButton1}>
+                        <Text style={styles.customButtonText}>Check TFJS Ready</Text>
+                    </TouchableOpacity>
+                    <Text></Text>
+                    {/* <TouchableOpacity onPress={onTFLiteHandler} style={styles.customButton1}>
                     <Text style={styles.customButtonText}>Check TFLite Ready</Text>
                 </TouchableOpacity> */}
-                <Text style={styles.sectionDescription}>Current File: {File.value}</Text>
-                <Text style={styles.sectionDescription}>Next File: {FileList[index]}</Text>
-                <View style={styles.customGrid22}>
-                    <TouchableOpacity onPress={onStartHandler} style={styles.customButton1}>
-                        <Text style={styles.customButtonText}>Start</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={onStopHandler} style={styles.customButton2}>
-                        <Text style={styles.customButtonText}>Stop</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={onResetHandler} style={styles.customButton3}>
-                        <Text style={styles.customButtonText}>Reset</Text>
-                    </TouchableOpacity>
+                    <Text style={styles.sectionDescription}>Current File: {File.value}</Text>
+                    <Text style={styles.sectionDescription}>Next File: {FileList[index]}</Text>
+                    <View style={styles.customGrid22}>
+                        <TouchableOpacity onPress={onStartHandler} style={styles.customButton1}>
+                            <Text style={styles.customButtonText}>Start</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={onStopHandler} style={styles.customButton2}>
+                            <Text style={styles.customButtonText}>Stop</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={onResetHandler} style={styles.customButton3}>
+                            <Text style={styles.customButtonText}>Reset</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <Text style={styles.sectionDescription}>Next Prediction: {counter} seconds</Text>
+                    <Text style={styles.sectionDescription}>Status: {prog}</Text>
+                    <Text style={styles.sectionDescription}>Detected: {prediction}</Text>
+                    <Text style={styles.sectionDescription}>Reject Status: {reject}</Text>
                 </View>
-                <Text style={styles.sectionDescription}>Next Prediction: {counter} seconds</Text>
-                <Text style={styles.sectionDescription}>Status: {prog}</Text>
-                <Text style={styles.sectionDescription}>Detected: {prediction}</Text>
-                <Text style={styles.sectionDescription}>Reject Status: {reject}</Text>
             </View>
-        </View>
-    </ScrollView>
+        </ScrollView>
     );
 }
 
