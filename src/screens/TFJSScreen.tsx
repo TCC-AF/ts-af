@@ -2,27 +2,15 @@ import React, { type PropsWithChildren } from 'react';
 import styles from '../components/CustomStyle';
 
 import {
-    Button,
-    Pressable,
     Text,
-    useColorScheme,
     View,
     ScrollView,
-    Touchable,
     TouchableOpacity,
 } from 'react-native';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer, StackActions } from '@react-navigation/native';
-import { white } from 'react-native-paper/lib/typescript/styles/colors';
-
 const Stack = createNativeStackNavigator();
-// const File = {value:'None'};
-const File = { value: 'sample06-6' };
-// const FileList = ['sample.json'];
-// const FileList = ['sample.json', '0006-6.txt', '0007-1.txt', '0007-2.txt', '0007-3.txt',
-    // '0008-1.txt', '0008-2.txt', '0008-3.txt', '0009-1.txt', '0009-2.txt', '0009-3.txt'];
-
+const File = { value: 'p_sample.json' };
 const FileList = ['p_sample.json', 'p_0006-6.txt', 'p_0007-1.txt', 'p_0007-2.txt', 'p_0007-3.txt',
     'p_0008-1.txt', 'p_0008-2.txt', 'p_0008-3.txt', 'p_0009-1.txt', 'p_0009-2.txt', 'p_0009-3.txt'];
 
@@ -32,19 +20,11 @@ var isStart = false;
 import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-react-native';
 
-import RNFS from 'react-native-fs';
+// import RNFS from 'react-native-fs';
 import { bundleResourceIO } from '@tensorflow/tfjs-react-native';
 
-// const modelJson = require('../assets/af/layers-model/model.json');
-// const modelWeights = require('../assets/af/layers-model/group1-shard1of34.bin');
-// const modelWeights = require('../assets/af/graph-model/group1-shard1of33.bin');
-
-// const modelJson = require('../assets/af/layers-model/model.json');
 const modelJson = require('../assets/af/graph-model/model.json');
-// const modelWeights = require('../assets/af/layers-model/weights.bin');
 const modelWeights = require('../assets/af/graph-model/weights.bin');
-
-const p_ecg = require('../assets/samples/processed/p_sample.json');
 
 export default function TFJSStackNavigation() {
     return (
@@ -56,28 +36,24 @@ export default function TFJSStackNavigation() {
 }
 
 async function readFromSample() {
-    // var fetchURL = 'https://raw.githubusercontent.com/ItsLame/samples/main/readings/' + File.value;
-    // var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/' + File.value;
-    // var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/sample06-6.txt';
-    // var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/0006-6.txt';
-
-    var fetchURL = FileList[0];
+    // var fetchFile = FileList[0];
+    var fetchFile = File.value;
+    var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/processed/' + fetchFile;
 
     // if (FileFormat == 'json') {
-    if (fetchURL.split('.')[1] == 'json') {
-        let sample_data = JSON.stringify(fetchURL);
-        console.log(sample_data)
-        return sample_data; 
-        // return fetch(fetchURL)
-        //     .then((response) => response.json())
-        //     .then((responseJson) => {
-        //         return responseJson[3];
-        //     })
-        //     .catch((error) => {
-        //         console.error(error);
-        //     });
+    if (fetchFile.split('.')[1] == 'json') {
+        return fetch(fetchURL)
+            .then((response) => response.json())
+            .then((responseJson) => {
+                // console.log(responseJson)
+                return responseJson[3];
+                // return responseJson;
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     }
-    else if (fetchURL.split('.')[1] == 'txt') {
+    else if (fetchFile.split('.')[1] == 'txt') {
         const requestOptions = {
             method: 'GET',
             headers: { 'Content-Type': 'text/plain' },
@@ -96,7 +72,7 @@ async function readFromSample() {
 }
 
 export function TFJSScreen({ navigation }: { navigation: any }) {
-    var myTimer = 30;
+    var myTimer = 15;
     const [prediction, setPrediction] = React.useState('None');
     const [reject, setReject] = React.useState('None');
     const [counter, setCounter] = React.useState(myTimer);
@@ -186,155 +162,41 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
         await tf.ready();
         console.log('TFJS Ready');
 
-        // The minimum prediction confidence.
-        // const threshold = 0.9;
+        // try detect with tfjs
+        // onTFJSDetect()
+    }
 
-        // Load the model. Users optionally pass in a threshold and an array of
-        // labels to include.
-        // toxicity.load(threshold).then(model => {
-            // const sentences = ['you suck'];
-
-            // model.classify(sentences).then(predictions => {
-                // `predictions` is an array of objects, one for each prediction head,
-                // that contains the raw probabilities for each input along with the
-                // final prediction in `match` (either `true` or `false`).
-                // If neither prediction exceeds the threshold, `match` is `null`.
-
-                // console.log(predictions);
-                /*
-                prints:
-                {
-                "label": "identity_attack",
-                "results": [{
-                    "probabilities": [0.9659664034843445, 0.03403361141681671],
-                    "match": false
-                }]
-                },
-                {
-                "label": "insult",
-                "results": [{
-                    "probabilities": [0.08124706149101257, 0.9187529683113098],
-                    "match": true
-                }]
-                },
-                ...
-                */
-            // });
-        // });
-
-        // return;
-
-
+    const onTFJSDetect = async (simulatedValue: number[]) => {
         try {
-            // load model
-            let model = await tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights));
-
             // read from sample
+            setProg('Reading...');
             let sample = await readFromSample();
 
             // expand to match input
+            setProg('Expanding...');
             let sample_expand = tf.expandDims(tf.expandDims(sample, 1), 0);
+            
+            // load model
+            setProg('Loading Model...');
+            // let model = await tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights));
+            tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights))
+            .then(model => {
+                setProg('Predicting...')
+                setTimeout(() => { setProg('Measuring...') }, 1000);
+                console.log('PREDICTING...')
+                let res = model.predict(sample_expand) as tf.Tensor;
+                console.log('PREDICTION OK!')
+                checkTFJSResult(res.as1D())
+            })
 
             // predict model
-            let res = model.predict(sample_expand) as tf.Tensor;
-
-            console.log("check predict pass")
-            // console.log(res)
-            // console.log("respond ok")
-
-            // print results
-            // res.print();
-
-            console.log(res.as1D().toString())
-
-            checkTFJSResult(res.as1D())
-            // console.log(res.array())
-            // console.log(res.toFloat())
-
-            // load model
-            // let model = await tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights));
-            // let model = await tf.loadLayersModel(bundleResourceIO(modelJson, modelWeights));
-
-            // read from sample
-            // let sample = await readFromSample();
-            // let sample_expand = tf.expandDims(tf.expandDims(sample, 1), 0);
-
-            // console.log(sample_expand)
-
-            // console.log(typeof(sample_expand))
-            // console.log(model.outputs)
-
-            // let tempNRR = tf.tensor(sample)
-            // let transSample = tf.expandDims(tf.tensor(sample), 0);
-            // console.log(transSample)
             // let res = model.predict(sample_expand) as tf.Tensor;
-            // let res = await model.predict(sample_expand);
-            // console.log("check predict pass")
-            // console.log(res)
-            // console.log("respond ok")
-            // console.log("printing")
-            // res.print();
+            // setProg('Predicting...');
+            // let res = await model.predict(sample_expand) as tf.Tensor;
+            // console.log("Prediction Passed!")
 
-            // console.log(model.inputs);
-            // console.log(model.outputs);
-
-            // console.log(model.outputNodes);
-            // model
-
-            // console.log(sample_expand);
-            // console.log(sample);
-            // let prediction = tf.argMax(model.predict(sample_expand));
-            // let res = model.predict(sample);
-
-            // let tempF = tf.squeeze(sample);
-            // let tempN = 
-            // let tempNRF = tf.expandDims(tempF, 1)
-
-            // let input_details = tf.input(tempNRF);
-
-            // const res = model.predict(tempNRF);
-            // const res = model.predict(input_details) as tf.Tensor;
-            // console.log(res)
-
-            // console.log(input_details);
-
-            // console.log(sample);
-            // let sampleData = tf.tensor(sample);
-            // model.in
-            // console.log(sampleData);
-
-            // let sampleExpand = tf.expandDims(tf.expandDims(sampleData, 1), 0);
-            // console.log(sampleExpand)
-
-            // let newData = sampleData.reshape([-1, 3000, 1]);
-            // let newData = sampleData.reshape([1, 3000]);
-            // let newData = sampleData.reshape([-1, 3000, 1]);
-            // console.log(newData);
-
-            // let newArray = []
-            // for (var a in newData) {
-            // newArray.push(a);
-            // }
-
-            // console.log(newData);
-
-            // sampleData.reshape([-1, 3000, 1]).print();
-            // sampleData.reshape([1, 3000]).print();
-            // sampleData.reshape([3000, 1]).print();
-
-            // console.log(newData)
-            // let newData = sampleData.reshape([1, 7500]);
-            // let newData = sampleData.reshape([2, 3750]);
-            // let newData = sampleData.reshape([1, 3000])
-            // let newData = sampleData.reshape([1, 3001]);
-            // console.log(sampleData);
-            // console.log(newdata);
-
-            // make prediction based from sample array
-            // const res = model.predict(sampleData) as tf.Tensor;
-            // const res = model.predict(newData) as tf.Tensor;
-            // console.log(res)
-
+            // pass prediction results as 1d array
+            // checkTFJSResult(res.as1D())
         } catch (e) {
             // console.log("the model could not be loaded")
             console.log(e)
@@ -344,33 +206,36 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
     }
 
     const checkTFJSResult = (output_data: any) => {
+        // check prediction and reject
         let prediction = tf.argMax(output_data).arraySync() as number + 1;
         let predictionProb = output_data.arraySync() as number[];
         let thresh = [0.95, 0.91]
-        console.log(prediction);
-        console.log(tf.max(predictionProb).arraySync());
-        secondLargest(predictionProb);
+        
+        // compare with threshold
         if (tf.max(predictionProb).arraySync() < thresh[0] &&
-            (tf.max(predictionProb).arraySync() as number)-secondLargest(predictionProb) < thresh[1])
+            (tf.max(predictionProb).arraySync() as number) - secondLargest(predictionProb) < thresh[1])
             var reject = 1
         else
             reject = 0
     
-            switch (prediction) {
-                case 1: setPrediction('Atrial Fibrillation'); break;
-                case 2: setPrediction('Normal Sinus Rhythm'); break;
-                case 3: setPrediction('Other Arrhytmia'); break;
-                case 4: setPrediction('Too Noisy'); break;
-            }
-    
-            if (reject == 0)
-                setReject('Reliable');
-            else if (reject == 1)
-                setReject('Unreliable');
-    
-            setDone(true);
-            setProg('Success!');
-            setTimeout(() => { setProg('Measuring...') }, 1000);
+        // determine result to readable string
+        switch (prediction) {
+            case 1: setPrediction('Atrial Fibrillation'); break;
+            case 2: setPrediction('Normal Sinus Rhythm'); break;
+            case 3: setPrediction('Other Arrhytmia'); break;
+            case 4: setPrediction('Too Noisy'); break;
+        }
+
+        // determine reject to readable stirng
+        if (reject == 0)
+            setReject('Reliable');
+        else if (reject == 1)
+            setReject('Unreliable');
+
+        // update progress and status
+        setDone(true);
+        setProg('Success!');
+        setTimeout(() => { setProg('Measuring...') }, 1000);
     }
 
     // ----------------------------------- //
@@ -403,7 +268,8 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
 
     const detectSimulation = async (newList: number[]) => {
         setProg('Reading...');
-        await onDetect(newList);
+        // await onDetect(newList);
+        await onTFJSDetect(newList);
     }
 
     const contDetect = () => {
@@ -414,7 +280,8 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
         setIndex(0);
         setProg('Setting file...');
         File.value = FileList[index];
-        FileFormat = FileList[index].substr(FileList[index].indexOf('.') + 1, 4);
+        // FileFormat = FileList[index].substr(FileList[index].indexOf('.') + 1, 4);
+        FileFormat = FileList[index].split('.')[1];
         setIndex(index + 1);
     }
 
@@ -516,3 +383,157 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
 // const modelJson = require('../assets/af/layers-model/model.json');
 // const modelWeights = require('../assets/af/layers-model/group1-shard1of34.bin');
 // let model = await tf.loadLayersModel(bundleResourceIO(modelJson, modelWeights));
+
+        // The minimum prediction confidence.
+        // const threshold = 0.9;
+
+        // Load the model. Users optionally pass in a threshold and an array of
+        // labels to include.
+        // toxicity.load(threshold).then(model => {
+            // const sentences = ['you suck'];
+
+            // model.classify(sentences).then(predictions => {
+                // `predictions` is an array of objects, one for each prediction head,
+                // that contains the raw probabilities for each input along with the
+                // final prediction in `match` (either `true` or `false`).
+                // If neither prediction exceeds the threshold, `match` is `null`.
+
+                // console.log(predictions);
+                /*
+                prints:
+                {
+                "label": "identity_attack",
+                "results": [{
+                    "probabilities": [0.9659664034843445, 0.03403361141681671],
+                    "match": false
+                }]
+                },
+                {
+                "label": "insult",
+                "results": [{
+                    "probabilities": [0.08124706149101257, 0.9187529683113098],
+                    "match": true
+                }]
+                },
+                ...
+                */
+            // });
+        // });
+
+        // return;
+
+        // console.log(res.array())
+            // console.log(res.toFloat())
+
+            // load model
+            // let model = await tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights));
+            // let model = await tf.loadLayersModel(bundleResourceIO(modelJson, modelWeights));
+
+            // read from sample
+            // let sample = await readFromSample();
+            // let sample_expand = tf.expandDims(tf.expandDims(sample, 1), 0);
+
+            // console.log(sample_expand)
+
+            // console.log(typeof(sample_expand))
+            // console.log(model.outputs)
+
+            // let tempNRR = tf.tensor(sample)
+            // let transSample = tf.expandDims(tf.tensor(sample), 0);
+            // console.log(transSample)
+            // let res = model.predict(sample_expand) as tf.Tensor;
+            // let res = await model.predict(sample_expand);
+            // console.log("check predict pass")
+            // console.log(res)
+            // console.log("respond ok")
+            // console.log("printing")
+            // res.print();
+
+            // console.log(model.inputs);
+            // console.log(model.outputs);
+
+            // console.log(model.outputNodes);
+            // model
+
+            // console.log(sample_expand);
+            // console.log(sample);
+            // let prediction = tf.argMax(model.predict(sample_expand));
+            // let res = model.predict(sample);
+
+            // let tempF = tf.squeeze(sample);
+            // let tempN = 
+            // let tempNRF = tf.expandDims(tempF, 1)
+
+            // let input_details = tf.input(tempNRF);
+
+            // const res = model.predict(tempNRF);
+            // const res = model.predict(input_details) as tf.Tensor;
+            // console.log(res)
+
+            // console.log(input_details);
+
+            // console.log(sample);
+            // let sampleData = tf.tensor(sample);
+            // model.in
+            // console.log(sampleData);
+
+            // let sampleExpand = tf.expandDims(tf.expandDims(sampleData, 1), 0);
+            // console.log(sampleExpand)
+
+            // let newData = sampleData.reshape([-1, 3000, 1]);
+            // let newData = sampleData.reshape([1, 3000]);
+            // let newData = sampleData.reshape([-1, 3000, 1]);
+            // console.log(newData);
+
+            // let newArray = []
+            // for (var a in newData) {
+            // newArray.push(a);
+            // }
+
+            // console.log(newData);
+
+            // sampleData.reshape([-1, 3000, 1]).print();
+            // sampleData.reshape([1, 3000]).print();
+            // sampleData.reshape([3000, 1]).print();
+
+            // console.log(newData)
+            // let newData = sampleData.reshape([1, 7500]);
+            // let newData = sampleData.reshape([2, 3750]);
+            // let newData = sampleData.reshape([1, 3000])
+            // let newData = sampleData.reshape([1, 3001]);
+            // console.log(sampleData);
+            // console.log(newdata);
+
+            // make prediction based from sample array
+            // const res = model.predict(sampleData) as tf.Tensor;
+            // const res = model.predict(newData) as tf.Tensor;
+            // console.log(res)
+
+        // var fetchURL = 'https://raw.githubusercontent.com/ItsLame/samples/main/readings/' + File.value;
+    // var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/' + File.value;
+    // var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/sample06-6.txt';
+    // var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/0006-6.txt';
+
+    // const modelJson = require('../assets/af/layers-model/model.json');
+// const modelWeights = require('../assets/af/layers-model/group1-shard1of34.bin');
+// const modelWeights = require('../assets/af/graph-model/group1-shard1of33.bin');
+// const modelJson = require('../assets/af/layers-model/model.json');
+// const modelWeights = require('../assets/af/layers-model/weights.bin');
+
+// const File = {value:'None'};
+// const FileList = ['sample.json'];
+// const FileList = ['sample.json', '0006-6.txt', '0007-1.txt', '0007-2.txt', '0007-3.txt',
+    // '0008-1.txt', '0008-2.txt', '0008-3.txt', '0009-1.txt', '0009-2.txt', '0009-3.txt'];
+
+      // var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/processed/p_sample.json';
+    // var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/processed/p_0006-6.txt';
+
+                // console.log(res)
+            // console.log("respond ok")
+
+            // print results
+            // res.print();
+
+            // console.log(prediction);
+        // console.log(tf.max(predictionProb).arraySync());
+        // secondLargest(predictionProb);
