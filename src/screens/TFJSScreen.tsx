@@ -26,6 +26,9 @@ import { bundleResourceIO } from '@tensorflow/tfjs-react-native';
 const modelJson = require('../assets/af/graph-model/model.json');
 const modelWeights = require('../assets/af/graph-model/weights.bin');
 
+// import BackgroundTimer from 'react-native-background-timer';
+import BackgroundTimer from 'react-native-background-timer';
+
 export default function TFJSStackNavigation() {
     return (
         <Stack.Navigator>
@@ -82,20 +85,40 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
     const [prog, setProg] = React.useState('Idle')
     const [index, setIndex] = React.useState(0);
 
-    React.useEffect(() => {
-        if (startCounter) {
-            const timer = counter >= 0 && setInterval(() => setCounter(counter - 1), 1000);
-
-            if (counter < 0) {
-                readSimulation();
-                contDetect();
+    const bgTimer = () => {
+        BackgroundTimer.runBackgroundTimer(() => { 
+            if (counter > 0) {
+                setCounter(counter - 1);
+            }
+            else {
                 setCounter(myTimer);
             }
+        //code that will be called every 3 seconds 
+        }, 1000);
+    }
 
-            return () => clearInterval(timer);
+    React.useEffect(() => {
+        if(counter === 0) {
+            readSimulation();
+            contDetect();
+            setStartCounter(false);
+            setStartCounter(true);
+        }
+    }, [counter]);
+
+    React.useEffect(() => {
+        if (startCounter) {
+            bgTimer();
+        }
+        else {
+            BackgroundTimer.stopBackgroundTimer();
+        }
+
+        return () => {
+            BackgroundTimer.stopBackgroundTimer();
         }
     }
-    ), [counter, startCounter]
+    ), [startCounter]
 
     // ---------------------------------- //
     // ------ AF Detection (Azure) ------ //
