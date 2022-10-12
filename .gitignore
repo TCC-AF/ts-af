@@ -64,4 +64,9 @@ buck-out/
 src/modules/af/model_custom.tflite
 *.tflite
 *.bin
+
 model.json
+
+src/assets/af/graph-model/model.json
+src/assets/af/layers-model/model.json
+
