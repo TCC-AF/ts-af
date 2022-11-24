@@ -36,5 +36,5 @@ Afterwards, browse to `src/assets/af/graph-model` and put both files in it.
 ## Other Links
 
 - [List of sample files](https://github.com/TCC-AF/Samples)
-- [AF module in for TCC-Jadeite](https://github.com/unsw-gsbme/tcc-af-module)
+- [AF module in for TCC-Jadeite](https://github.com/ItsLame/tcc-af/)
 - [Prototype (Azure only)](https://github.com/TCC-AF/azure-af/)
