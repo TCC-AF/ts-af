@@ -258,7 +258,6 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
 
     const detectSimulation = async (newList: number[]) => {
         setProg('Reading...');
-        // await onDetect(newList);
         await onTFJSDetect(newList);
     }
 
