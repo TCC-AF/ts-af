@@ -64,6 +64,21 @@ export default StyleSheet.create
         // android
         elevation: 10,
     },
+    customButton4: {
+        backgroundColor: '#1b5c0e',
+        borderRadius: 5,
+        paddingHorizontal: 30,
+        paddingVertical: 10,
+        marginBottom: 10,
+        alignItems: 'center',
+        // ios
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 2,
+        // android
+        elevation: 10,
+    },
     customButtonText: {
         color: 'white',
         fontSize: 18,

@@ -1,4 +1,4 @@
-import React, { type PropsWithChildren } from 'react';
+import React from 'react';
 import styles from '../components/CustomStyle';
 
 import {
@@ -17,17 +17,13 @@ const FileList = ['p_sample.json', 'p_0006-6.txt', 'p_0007-1.txt', 'p_0007-2.txt
 var FileFormat = 'json';
 var isStart = false;
 
+var model:tf.GraphModel;
+
 import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-react-native';
-
-// import RNFS from 'react-native-fs';
 import { bundleResourceIO } from '@tensorflow/tfjs-react-native';
-
 const modelJson = require('../assets/af/graph-model/model.json');
 const modelWeights = require('../assets/af/graph-model/weights.bin');
-
-// import BackgroundTimer from 'react-native-background-timer';
-import BackgroundTimer from 'react-native-background-timer';
 
 export default function TFJSStackNavigation() {
     return (
@@ -39,7 +35,6 @@ export default function TFJSStackNavigation() {
 }
 
 async function readFromSample() {
-    // var fetchFile = FileList[0];
     var fetchFile = File.value;
     var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/processed/' + fetchFile;
 
@@ -64,7 +59,6 @@ async function readFromSample() {
         return fetch(fetchURL, requestOptions)
             .then((response) => {
                 return response.text().then(text => {
-                    // console.log(text.split('\n').map(Number));
                     return (text.split('\n').map(Number));
                 });
             })
@@ -80,45 +74,25 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
     const [reject, setReject] = React.useState('None');
     const [counter, setCounter] = React.useState(myTimer);
     const [startCounter, setStartCounter] = React.useState(false);
+    const [TFJSReady, setTFJSReady] = React.useState(false);
 
-    const [done, setDone] = React.useState(false);
     const [prog, setProg] = React.useState('Idle')
     const [index, setIndex] = React.useState(0);
 
-    const bgTimer = () => {
-        BackgroundTimer.runBackgroundTimer(() => { 
-            if (counter > 0) {
-                setCounter(counter - 1);
-            }
-            else {
-                setCounter(myTimer);
-            }
-        //code that will be called every 3 seconds 
-        }, 1000);
-    }
-
-    React.useEffect(() => {
-        if(counter === 0) {
-            readSimulation();
-            contDetect();
-            setStartCounter(false);
-            setStartCounter(true);
-        }
-    }, [counter]);
-
     React.useEffect(() => {
         if (startCounter) {
-            bgTimer();
-        }
-        else {
-            BackgroundTimer.stopBackgroundTimer();
-        }
+            const timer = counter >= 0 && setInterval(() => setCounter(counter - 1), 1000);
 
-        return () => {
-            BackgroundTimer.stopBackgroundTimer();
+            if (counter < 0) {
+                readSimulation();
+                contDetect();
+                setCounter(myTimer);
+            }
+
+            return () => clearInterval(timer);
         }
     }
-    ), [startCounter]
+    ), [counter, startCounter]
 
     // ---------------------------------- //
     // ------ AF Detection (Azure) ------ //
@@ -160,7 +134,6 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
         else if (value.reject == 1)
             setReject('Unreliable');
 
-        setDone(true);
         setProg('Success!');
         setTimeout(() => { setProg('Measuring...') }, 1000);
     }
@@ -185,32 +158,85 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
         await tf.ready();
         console.log('TFJS Ready');
 
-        // try detect with tfjs
-        // onTFJSDetect()
+        // load model
+        setProg('Loading Model...');
+        model = await tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights));
+        setProg('Loaded!')
+        setTFJSReady(true)
+    }
+
+    const onTFJSPredict = (sample_expand:tf.Tensor) => {
+        try {
+            const res = model.predict(sample_expand) as tf.Tensor;
+            // console.log(res.data())
+            // return Promise.resolve(res.data())
+            return Promise.resolve(res)
+        } catch(e) {
+            return Promise.reject(e)
+        }
     }
 
     const onTFJSDetect = async (simulatedValue: number[]) => {
+    // const onTFJSDetect = async () => {
         try {
             // read from sample
+            // setProg('Reading...');
+            // let sample = await readFromSample();
+            // let sample = readFromSample();
+
             setProg('Reading...');
-            let sample = await readFromSample();
+            readFromSample()
+                .then(sample => {
+                    setProg('Expanding...');
+                    console.log("EXPANDING")
+                    let sample_expand = tf.expandDims(tf.expandDims(sample, 1), 0);
+                    console.log(sample_expand)
+
+                    setProg('Predicting...')
+                    console.log("PREDICTING")
+                    // setTimeout(() => { setProg('Measuring...') }, 1000);
+                    
+                    // predict model
+                    // let res = model.predict(sample_expand) as tf.Tensor;
+                    onTFJSPredict(sample_expand)
+                        .then(data => {
+                            // console.log(data)
+                            checkTFJSResult(data.as1D())
+                        })
+                    
+                    // pass prediction results as 1d array
+                    // checkTFJSResult(res.as1D())
+                })
 
             // expand to match input
-            setProg('Expanding...');
-            let sample_expand = tf.expandDims(tf.expandDims(sample, 1), 0);
+            // setProg('Expanding...');
+            // let sample_expand = tf.expandDims(tf.expandDims(sample, 1), 0);
             
             // load model
-            setProg('Loading Model...');
+            // setProg('Loading Model...');
             // let model = await tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights));
-            tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights))
-            .then(model => {
-                setProg('Predicting...')
-                setTimeout(() => { setProg('Measuring...') }, 1000);
-                console.log('PREDICTING...')
-                let res = model.predict(sample_expand) as tf.Tensor;
-                console.log('PREDICTION OK!')
-                checkTFJSResult(res.as1D())
-            })
+            // let model = await tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights));
+            
+            // setProg('Predicting...')
+            // setTimeout(() => { setProg('Measuring...') }, 1000);
+            
+            // predict model
+            // let res = model.predict(sample_expand) as tf.Tensor;
+            
+            // pass prediction results as 1d array
+            // checkTFJSResult(res.as1D())
+
+            // tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights))
+            // .then(model => {
+            //     setProg('Predicting...')
+            //     setTimeout(() => { setProg('Measuring...') }, 1000);
+                
+            //     // predict model
+            //     let res = model.predict(sample_expand) as tf.Tensor;
+                
+            //     // pass prediction results as 1d array
+            //     checkTFJSResult(res.as1D())
+            // })
 
             // predict model
             // let res = model.predict(sample_expand) as tf.Tensor;
@@ -256,7 +282,6 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
             setReject('Unreliable');
 
         // update progress and status
-        setDone(true);
         setProg('Success!');
         setTimeout(() => { setProg('Measuring...') }, 1000);
     }
@@ -348,13 +373,9 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
                     uses the tf.lite model (every 30 seconds) to make a prediction.
                 </Text>
                 <View style={styles.customContainer}>
-                    <TouchableOpacity onPress={onTFJSReadyHandler} style={styles.customButton1}>
-                        <Text style={styles.customButtonText}>Check TFJS Ready</Text>
+                    <TouchableOpacity onPress={onTFJSReadyHandler} disabled={TFJSReady} style={[styles.customButton4, TFJSReady? { opacity: 0.5 } : { opacity: 1 }]}>
+                        <Text style={styles.customButtonText}>{TFJSReady? 'TFJS Enabled' : 'Click to Enable TFJS'}</Text>
                     </TouchableOpacity>
-                    <Text></Text>
-                    {/* <TouchableOpacity onPress={onTFLiteHandler} style={styles.customButton1}>
-                    <Text style={styles.customButtonText}>Check TFLite Ready</Text>
-                </TouchableOpacity> */}
                     <Text style={styles.sectionDescription}>Current File: {File.value}</Text>
                     <Text style={styles.sectionDescription}>Next File: {FileList[index]}</Text>
                     <View style={styles.customGrid22}>
