@@ -162,8 +162,6 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
     const onTFJSPredict = (sample_expand:tf.Tensor) => {
         try {
             const res = model.predict(sample_expand) as tf.Tensor;
-            // console.log(res.data())
-            // return Promise.resolve(res.data())
             return Promise.resolve(res)
         } catch(e) {
             return Promise.reject(e)
@@ -171,13 +169,8 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
     }
 
     const onTFJSDetect = async (simulatedValue: number[]) => {
-    // const onTFJSDetect = async () => {
         try {
             // read from sample
-            // setProg('Reading...');
-            // let sample = await readFromSample();
-            // let sample = readFromSample();
-
             setProg('Reading...');
             readFromSample()
                 .then(sample => {
@@ -188,60 +181,15 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
 
                     setProg('Predicting...')
                     console.log("PREDICTING")
-                    // setTimeout(() => { setProg('Measuring...') }, 1000);
                     
                     // predict model
-                    // let res = model.predict(sample_expand) as tf.Tensor;
                     onTFJSPredict(sample_expand)
                         .then(data => {
-                            // console.log(data)
+                            // pass prediction results as 1d array
                             checkTFJSResult(data.as1D())
                         })
-                    
-                    // pass prediction results as 1d array
-                    // checkTFJSResult(res.as1D())
                 })
-
-            // expand to match input
-            // setProg('Expanding...');
-            // let sample_expand = tf.expandDims(tf.expandDims(sample, 1), 0);
-            
-            // load model
-            // setProg('Loading Model...');
-            // let model = await tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights));
-            // let model = await tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights));
-            
-            // setProg('Predicting...')
-            // setTimeout(() => { setProg('Measuring...') }, 1000);
-            
-            // predict model
-            // let res = model.predict(sample_expand) as tf.Tensor;
-            
-            // pass prediction results as 1d array
-            // checkTFJSResult(res.as1D())
-
-            // tf.loadGraphModel(bundleResourceIO(modelJson, modelWeights))
-            // .then(model => {
-            //     setProg('Predicting...')
-            //     setTimeout(() => { setProg('Measuring...') }, 1000);
-                
-            //     // predict model
-            //     let res = model.predict(sample_expand) as tf.Tensor;
-                
-            //     // pass prediction results as 1d array
-            //     checkTFJSResult(res.as1D())
-            // })
-
-            // predict model
-            // let res = model.predict(sample_expand) as tf.Tensor;
-            // setProg('Predicting...');
-            // let res = await model.predict(sample_expand) as tf.Tensor;
-            // console.log("Prediction Passed!")
-
-            // pass prediction results as 1d array
-            // checkTFJSResult(res.as1D())
         } catch (e) {
-            // console.log("the model could not be loaded")
             console.log(e)
         } finally {
             console.log("Done")
@@ -333,7 +281,6 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
 
     const onStartHandler = () => {
         setProg('Starting...');
-        isStart = true;
         contDetect();
         setStartCounter(true);
         readSimulation();
@@ -342,17 +289,14 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
     const onStopHandler = () => {
         setProg('Stopping...');
         setStartCounter(false);
-        isStart = false;
         setTimeout(() => { setProg('Idle') }, 1000);
     }
 
     const onResetHandler = () => {
         setProg('Reseting...');
         setStartCounter(false);
-        isStart = false;
         setIndex(0);
         File.value = 'None';
-        FileFormat = FileList[index].substr(FileList[index].indexOf('.') + 1, 4);
         setPrediction('None');
         setReject('None');
         setCounter(myTimer);
