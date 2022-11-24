@@ -374,18 +374,18 @@ export function TFJSScreen({ navigation }: { navigation: any }) {
                 </Text>
                 <View style={styles.customContainer}>
                     <TouchableOpacity onPress={onTFJSReadyHandler} disabled={TFJSReady} style={[styles.customButton4, TFJSReady? { opacity: 0.5 } : { opacity: 1 }]}>
-                        <Text style={styles.customButtonText}>{TFJSReady? 'TFJS Enabled' : 'Click to Enable TFJS'}</Text>
+                        <Text style={styles.customButtonText}>{TFJSReady? 'TFJS Enabled' : 'Tap to Enable TFJS'}</Text>
                     </TouchableOpacity>
                     <Text style={styles.sectionDescription}>Current File: {File.value}</Text>
                     <Text style={styles.sectionDescription}>Next File: {FileList[index]}</Text>
                     <View style={styles.customGrid22}>
-                        <TouchableOpacity onPress={onStartHandler} style={styles.customButton1}>
+                        <TouchableOpacity onPress={onStartHandler} disabled={!TFJSReady} style={[styles.customButton1, !TFJSReady? { opacity: 0.5 } : { opacity: 1 }]}>
                             <Text style={styles.customButtonText}>Start</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={onStopHandler} style={styles.customButton2}>
+                        <TouchableOpacity onPress={onStopHandler} disabled={!TFJSReady} style={[styles.customButton2, !TFJSReady? { opacity: 0.5 } : { opacity: 1 }]}>
                             <Text style={styles.customButtonText}>Stop</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={onResetHandler} style={styles.customButton3}>
+                        <TouchableOpacity onPress={onResetHandler} disabled={!TFJSReady} style={[styles.customButton3, !TFJSReady? { opacity: 0.5 } : { opacity: 1 }]}>
                             <Text style={styles.customButtonText}>Reset</Text>
                         </TouchableOpacity>
                     </View>
