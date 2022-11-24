@@ -32,3 +32,9 @@ Afterwards, browse to `src/assets/af/graph-model` and put both files in it.
 <img src="./pictures/caf.png" width="300" />
 <img src="./pictures/tfjs_caf_inactive.png" width="290" />
 <img src="./pictures/tfjs_caf_active.png" width="290" />
+
+## Other Links
+
+- [List of sample files](https://github.com/TCC-AF/Samples)
+- [AF module in for TCC-Jadeite](https://github.com/unsw-gsbme/tcc-af-module)
+- [Prototype (Azure only)](https://github.com/TCC-AF/azure-af/)
