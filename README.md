@@ -36,5 +36,16 @@ Afterwards, browse to `src/assets/af/graph-model` and put both files in it.
 ## Other Links
 
 - [List of sample files](https://github.com/TCC-AF/Samples)
-- [AF module in for TCC-Jadeite](https://github.com/ItsLame/tcc-af/)
+- [AF module in TCC-Jadeite](https://github.com/ItsLame/tcc-af/)
 - [Prototype (Azure only)](https://github.com/TCC-AF/azure-af/)
+
+# Extra
+Repo for AF module in TCC-Jadeite is probably privated for confidential reasons. Thus, below are screenshots of the module.
+## Screenshots of AF Module in TCC-Jadeite
+<img src="./pictures/tcc-jadeite/home_af_card.png" width="300" />
+<img src="./pictures/tcc-jadeite/detector_idle.png" width="300" />
+<img src="./pictures/tcc-jadeite/detector_active.png" width="300" />
+<img src="./pictures/tcc-jadeite/records_populated.png" width="300" />
+<img src="./pictures/tcc-jadeite/records_af.png" width="290" />
+<img src="./pictures/tcc-jadeite/records_oa.png" width="290" />
+<img src="./pictures/tcc-jadeite/notification.png" width="300" />
