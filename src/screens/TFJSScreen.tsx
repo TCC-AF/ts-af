@@ -14,9 +14,6 @@ const File = { value: 'p_sample.json' };
 const FileList = ['p_sample.json', 'p_0006-6.txt', 'p_0007-1.txt', 'p_0007-2.txt', 'p_0007-3.txt',
     'p_0008-1.txt', 'p_0008-2.txt', 'p_0008-3.txt', 'p_0009-1.txt', 'p_0009-2.txt', 'p_0009-3.txt'];
 
-var FileFormat = 'json';
-var isStart = false;
-
 var model:tf.GraphModel;
 
 import * as tf from '@tensorflow/tfjs';
@@ -38,14 +35,11 @@ async function readFromSample() {
     var fetchFile = File.value;
     var fetchURL = 'https://raw.githubusercontent.com/TCC-AF/Samples/main/readings/processed/' + fetchFile;
 
-    // if (FileFormat == 'json') {
     if (fetchFile.split('.')[1] == 'json') {
         return fetch(fetchURL)
             .then((response) => response.json())
             .then((responseJson) => {
-                // console.log(responseJson)
                 return responseJson[3];
-                // return responseJson;
             })
             .catch((error) => {
                 console.error(error);
