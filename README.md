@@ -43,11 +43,11 @@ Prototype of tcc-af module for tcc-jadeite. Using TFJS library to use TFJS graph
 ## Getting Started
 <sup>[[Back to top]](#ts-af)</sup>
 
-1. in root directory, run `yarn install`
-2. go to `/ios`, then run `pod install`
-3. run and build app using:
+1. In root directory, run `yarn install`
+2. Go to `/ios`, then run `pod install`
+3. Run and build app using:
    - iOS: `yarn run ios`
-   - Android: `yarn run android` (currently not available due to expo compatibility issues)
+   - Android: `yarn run android` (currently not available due to `expo` compatibility issues)
 
 ## Troubleshooting
 <sup>[[Back to top]](#ts-af)</sup>
