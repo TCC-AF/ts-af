@@ -5,8 +5,9 @@
 </div>
 
 ## Important Declarations
-- This is a **prototype**, for final module implemented into TeleClinical Care please visit https://github.com/ItsLame/tcc-af/
-- Final module is **not accessible** as it is currently **privated** due to **confidential** reasons, however [screenshots are available below](#screenshots)
+- This is a **prototype**
+- For final module implemented into TeleClinical Care please visit https://github.com/ItsLame/tcc-af/
+  - Final module might **not be accessible** as it is currently **privated due to confidential reasons**, however [screenshots are available below](#screenshots)
 
 ## Tables of Contents
 - [Description](#description)
@@ -52,13 +53,11 @@ Prototype of tcc-af module for tcc-jadeite. Using TFJS library to use TFJS graph
 <sup>[[Back to top]](#ts-af)</sup>
 
 If `model.json` or `weights.bin` are missing, please download using the links below:
-
 - [`model.json`](https://1drv.ms/u/s!AhwQNlQ3dXFkiu1spg20zRAjasW2fA?e=fVb1ZT)
 - [`weights.bin`](https://1drv.ms/u/s!AhwQNlQ3dXFkiu1tsGK-W9kAmr51jg?e=PrGFXN)
 
-Afterwards, browse to `src/assets/af/graph-model` and put both files in it.
-
-- If `/af` or `/graph-model` folder(s) does not exist, please create one on said directory.
+Afterwards, browse to `src/assets/af/graph-model` and put both files in it
+- If `/af` or `/graph-model` folder(s) does not exist, please create one in `src/assets/`
 
 ## Other Links
 <sup>[[Back to top]](#ts-af)</sup>
